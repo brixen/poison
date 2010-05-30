@@ -1,0 +1,440 @@
+# vim: filetype=treetop
+
+module Poison
+  grammar Poison
+    rule poison
+      hh s:statements end_of_file
+    end
+
+    rule statements
+      s1:stmt
+      (sep s2:stmt)* sep?
+      / ''
+    end
+
+    rule stmt
+      s:sets
+      ( or x:sets
+      / and x:sets )*
+    end
+
+    rule sets
+      e:eqs
+      ( assign s:sets
+      / or assign s:sets
+      / and assign s:sets
+      / pipe assign s:sets
+      / caret assign s:sets
+      / amp assign s:sets
+      / bitl assign s:sets
+      / bitr assign s:sets
+      / plus assign s:sets
+      / minus assign s:sets
+      / times assign s:sets
+      / div assign s:sets
+      / rem assign s:sets
+      / pow assign s:sets )?
+    end
+
+    rule eqs
+      c:cmps
+      ( cmp x:cmps
+      / eq x:cmps
+      / neq x:cmps )*
+    end
+
+    rule cmps
+      o:bitors
+      ( gte x:bitors
+      / gt x:bitors
+      / lte x:bitors
+      / lt x:bitors )*
+    end
+
+    rule bitors
+      a:bitand
+      ( pipe x:bitand
+      / caret x:bitand )*
+    end
+
+    rule bitand
+      b:bitshift
+      ( amp x:bitshift )*
+    end
+
+    rule bitshift
+      s:sum
+      ( bitl x:sum
+      / bitr x:sum )*
+    end
+
+    rule sum
+      p:product
+      ( plus x:product <Plus>
+      / minus x:product )*
+    end
+
+    rule product
+      s:sign
+      ( times x:sign
+      / div x:sign
+      / rem x:sign
+      / pow x:sign )*
+    end
+
+    rule sign
+      minus !minus s:sign
+      / plus !plus s:sign
+      / not s:sign
+      / wavy s:sign
+      / expr
+    end
+
+    rule expr
+      ( mminus a:atom
+      / pplus a:atom
+      / a:atom (pplus / mminus)?)
+        (call)*
+    end
+
+    rule atom
+      value / closure / table / call
+    end
+
+    rule call
+      (n:name (value / table)?
+      (value / table) )
+        b:block?
+    end
+
+    rule name
+      path
+      / quiz ( message
+             / path )
+      / !keyword
+        m:message
+    end
+
+    rule lick_items
+      i1:lick_item
+      (sep i2:lick_item)*
+      sep?
+      / ''
+    end
+
+    rule lick_item
+      m:message t:table v:loose
+      / m:message t:table
+      / m:message v:loose t:table
+      / m:message v:loose
+      / message
+    end
+
+    rule loose
+      value
+      / unquoted
+    end
+
+    rule closure
+      t:table? b:block
+    end
+
+    rule table
+      table_start s:statements table_end
+    end
+
+    rule block
+      block_start s:statements block_end
+    end
+
+    rule lick
+      lick_start i:lick_items lick_end
+    end
+
+    rule path
+      '/' message
+    end
+
+    rule message
+      utfw+ <Syntax::Message>
+    end
+
+    rule value
+      immed
+      / lick
+    end
+
+    rule immed
+      nil
+      / true
+      / false
+      / hex
+      / int
+      / real
+      / imag
+      / str1
+      / str2
+    end
+
+    rule utfw
+      [A-Za-z0-9_$@;`{}]
+      / '\304' [\250-\277]
+      / [\305-\337] [\200-\277]
+      / [\340-\357] [\200-\277] [\200-\277]
+      / [\360-\364] [\200-\277] [\200-\277] [\200-\277]
+    end
+
+    rule utf8
+      [\t\n\r\40-\176]
+      / [\302-\337] [\200-\277]
+      / [\340-\357] [\200-\277] [\200-\277]
+      / [\360-\364] [\200-\277] [\200-\277] [\200-\277]
+    end
+
+    rule comma ',' end
+    rule block_start ':' hh end
+    rule block_end '.' h end
+    rule table_start '(' hh end
+    rule table_end ')' h end
+    rule lick_start '[' hh end
+    rule lick_end ']' h end
+    rule quiz '?' hh end
+    rule assign '=' hh end
+
+    rule pplus
+      '++' h
+    end
+
+    rule mminus
+      '--' h
+    end
+
+    rule minus
+      '-' hh
+    end
+
+    rule plus
+      '+' hh
+    end
+
+    rule wavy
+      '~' hh
+    end
+
+    rule times
+      '*' hh
+    end
+
+    rule div
+      '/' hh
+    end
+
+    rule rem
+      '%' hh
+    end
+
+    rule pow
+      '**' hh
+    end
+
+    rule bitl
+      '<<' hh
+    end
+
+    rule bitr
+      '>>' hh
+    end
+
+    rule amp
+      '&' hh
+    end
+
+    rule caret
+      '^' hh
+    end
+
+    rule pipe
+      '|' hh
+    end
+
+    rule lt
+      '<' hh
+    end
+
+    rule lte
+      '<=' hh
+    end
+
+    rule gt
+      '>' hh
+    end
+
+    rule gte
+      '>=' hh
+    end
+
+    rule neq
+      '!='
+    end
+
+    rule eq
+      '=='
+    end
+
+    rule cmp
+      '<=>'
+    end
+
+    rule and
+      ("&&" / "and" !utfw) hh
+    end
+
+    rule or
+      ("||" / "or" !utfw) hh
+    end
+
+    rule not
+      ("!" / "not" !utfw) hh
+    end
+
+    rule keyword
+      "and" / "or" / "not"
+    end
+
+    rule nil
+      "nil" !utfw
+    end
+
+    rule true
+      "true" !utfw
+    end
+
+    rule false
+      "false" !utfw
+    end
+
+    rule hexl
+      [0-9A-Fa-f]
+    end
+
+    rule hex
+      '0x' hexl+
+    end
+
+    rule int
+      ('0' / [1-9] [0-9]*)
+    end
+
+    rule real
+      int '.' int ('e' [-+] [0-9]+)?
+    end
+
+    rule imag
+      real 'i'
+    end
+
+    rule q1
+      [']
+    end
+
+    rule c1
+      (!q1 utf8)+
+    end
+
+    rule str1
+      q1 (q1 q1 / c1)* q1
+    end
+
+    rule esc
+      '\\'
+    end
+
+    rule escn
+      esc 'n'
+    end
+
+    rule escb
+      esc 'b'
+    end
+
+    rule escf
+      esc 'f'
+    end
+
+    rule escr
+      esc 'r'
+    end
+
+    rule esct
+      esc 't'
+    end
+
+    rule escu
+      esc u hexl hexl hexl hexl
+    end
+
+    rule escc
+      esc utf8
+    end
+
+    rule q2
+      ["]
+    end
+
+    rule e2
+      '\\' ["]
+    end
+
+    rule c2
+      (!q2 !esc utf8)+
+    end
+
+    rule str2
+      q2 (e2 / escn / escb / escf / escr / esct / escu / escc / c2)*
+      q2
+    end
+
+    rule unq_char
+      '{' unq_char+ '}'
+      / '[' unq_char+ ']'
+      / '(' unq_char+ ')'
+      / !'{' !'[' !'(' !'}' !']' !')' utf8
+    end
+
+    rule unq_sep
+      sep !'{' !'[' !'('
+    end
+
+    rule unquoted
+      (!unq_sep !lick_end unq_char)+
+    end
+
+    rule h
+      (space / comment)*
+    end
+
+    rule hh
+      (space / comment / end_of_line)*
+    end
+
+    rule sep
+      (end_of_line / comma) (space / comment / end_of_line / comma)*
+    end
+
+    rule comment
+      '#' (!end_of_line utf8)*
+    end
+
+    rule space
+      ' ' / '\f' / '\v' / '\t'
+    end
+
+    rule end_of_line
+      '\r\n' / '\n' / '\r'
+    end
+
+    rule end_of_file
+      !.
+    end
+  end
+end
