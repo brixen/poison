@@ -1,0 +1,75 @@
+#!/usr/bin/env rbx
+
+$:.unshift File.expand_path('../../lib', __FILE__)
+
+require 'poison'
+
+class PoisonScript
+  def initialize
+    @evals = []
+  end
+
+  def options(argv=ARGV)
+    options = Rubinius::Options.new "Usage: poison [options] [script]", 20
+
+    options.on "-", "Read and evaluate code from STDIN" do
+      @source = STDIN.read
+    end
+
+    options.on "-c", "FILE", "Check the syntax of FILE" do |f|
+      begin
+        begin
+          Poison::Compiler.parse_file f, 1
+        rescue Poison::SyntaxError => e
+          e.show
+          exit 1
+        end
+
+        puts "Syntax OK"
+        exit 0
+      end
+    end
+
+    options.on "-e", "CODE", "Execute CODE" do |e|
+      @evals << e
+    end
+
+    options.on "-h", "--help", "Display this help" do
+      puts options
+      exit 0
+    end
+
+    options.doc ""
+
+    rest = options.parse(argv)
+    @source ||= rest.first
+  end
+
+  def evals
+    return if @evals.empty?
+    Poison::CodeLoader.execute_script @evals.join("\n")
+  end
+
+  def script
+    return unless @script
+
+    if File.exists? @scrip
+      Poison::CodeLoader.execute_file @script
+    else
+      STDERR.puts "Unable to find '#{@script}' to run"
+      exit 1
+    end
+  end
+
+  def repl
+  end
+
+  def main
+    options
+    evals
+    script
+    repl
+  end
+end
+
+PoisonScript.new.main
