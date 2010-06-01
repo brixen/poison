@@ -1,4 +1,6 @@
 #!/usr/bin/env rbx
+#
+# vim: filetype=ruby
 
 $:.unshift File.expand_path('../../lib', __FILE__)
 
@@ -7,6 +9,7 @@ require 'poison'
 class PoisonScript
   def initialize
     @evals = []
+    @asts = []
   end
 
   def options(argv=ARGV)
@@ -30,6 +33,10 @@ class PoisonScript
       end
     end
 
+    options.on "-A", "FILE", "Print the AST for FILE" do |code|
+      @asts << code
+    end
+
     options.on "-e", "CODE", "Execute CODE" do |e|
       @evals << e
     end
@@ -50,6 +57,15 @@ class PoisonScript
     Poison::CodeLoader.execute_script @evals.join("\n")
   end
 
+  def asts
+    return if @asts.empty?
+
+    require 'pp'
+
+    compiler = Poison::Compiler.new @asts.join("\n")
+    pp compiler.parse.to_sexp
+  end
+
   def script
     return unless @script
 
@@ -67,6 +83,7 @@ class PoisonScript
   def main
     options
     evals
+    asts
     script
     repl
   end

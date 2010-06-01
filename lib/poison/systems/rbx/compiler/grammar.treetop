@@ -3,13 +3,13 @@
 module Poison
   grammar Poison
     rule poison
-      hh s:statements end_of_file
+      hh statements end_of_file <Syntax::Script>
     end
 
     rule statements
       s1:stmt
-      (sep s2:stmt)* sep?
-      / ''
+      (sep s2:stmt)* sep? <Syntax::Statements>
+      / '' <Syntax::NilKind>
     end
 
     rule stmt
@@ -21,7 +21,7 @@ module Poison
     rule sets
       e:eqs
       ( assign s:sets
-      / or assign s:sets
+      / o:or assign s:sets
       / and assign s:sets
       / pipe assign s:sets
       / caret assign s:sets
@@ -94,7 +94,7 @@ module Poison
       ( mminus a:atom
       / pplus a:atom
       / a:atom (pplus / mminus)?)
-        (call)*
+        (call)* <Syntax::Expression>
     end
 
     rule atom
@@ -160,7 +160,7 @@ module Poison
     end
 
     rule value
-      immed
+      immed <Syntax::Value>
       / lick
     end
 
@@ -169,7 +169,11 @@ module Poison
       / true
       / false
       / hex
-      / int
+      / int {
+        def int
+          Syntax::Integer.from text_value
+        end
+      }
       / real
       / imag
       / str1

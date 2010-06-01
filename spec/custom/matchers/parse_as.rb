@@ -6,7 +6,7 @@ class ParseAsMatcher
   end
 
   def matches?(actual)
-    @actual = Poison::Compiler.new(actual).parse.to_sexp
+    @actual = Poison::Compiler.new(actual).parse.to_sexp.last
     @actual == @expected
   end
 
