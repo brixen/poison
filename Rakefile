@@ -22,4 +22,5 @@ task :build => :parser
 
 desc "Run the Poison specs (default)"
 task :spec => :build do
+  sh "mspec spec"
 end
