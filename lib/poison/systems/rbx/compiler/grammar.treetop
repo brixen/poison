@@ -1,7 +1,7 @@
 # vim: filetype=treetop
 
 module Poison
-  grammar Poison
+  grammar Grammar
     rule poison
       hh statements end_of_file <Syntax::Script>
     end
@@ -165,19 +165,51 @@ module Poison
     end
 
     rule immed
-      nil
-      / true
-      / false
-      / hex
-      / int {
-        def int
+      nil {
+        def nil_value
+          Syntax::NilKind.from text_value
+        end
+      }
+      / true {
+        def true_value
+          Syntax::Boolean.from text_value
+        end
+      }
+      / false {
+        def false_value
+          Syntax::Boolean.from text_value
+        end
+      }
+      / hex {
+        def int_value
           Syntax::Integer.from text_value
         end
       }
-      / real
-      / imag
-      / str1
-      / str2
+      / imag {
+        def imag_value
+          Syntax::Imaginary.from text_value
+        end
+      }
+      / real {
+        def real_value
+          Syntax::Real.from text_value
+        end
+      }
+      / int {
+        def int_value
+          Syntax::Integer.from text_value
+        end
+      }
+      / str1 {
+        def string_value
+          Syntax::String.from text_value[1..-2]
+        end
+      }
+      / str2 {
+        def string_value
+          Syntax::String.from text_value[1..-2]
+        end
+      }
     end
 
     rule utfw

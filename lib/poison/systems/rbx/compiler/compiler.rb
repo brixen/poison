@@ -6,7 +6,7 @@ module Poison
         require 'treetop'
         require 'poison/systems/rbx/compiler/grammar'
         require 'poison/systems/rbx/compiler/node'
-        @treetop_parser = PoisonParser
+        @treetop_parser = GrammarParser
       end
 
       @treetop_parser
