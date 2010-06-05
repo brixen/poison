@@ -103,7 +103,7 @@ module Poison
 
     rule call
       (n:name (value / table)?
-      (value / table) )
+      / (value / table) )
         b:block?
     end
 
@@ -156,11 +156,11 @@ module Poison
     end
 
     rule message
-      utfw+ <Syntax::Message>
+      utfw+ h <Syntax::Message>
     end
 
     rule value
-      immed <Syntax::Value>
+      immed h <Syntax::Value>
       / lick
     end
 
@@ -382,7 +382,7 @@ module Poison
     end
 
     rule esc
-      '\\'
+      "\\"
     end
 
     rule escn
@@ -418,7 +418,7 @@ module Poison
     end
 
     rule e2
-      '\\' ["]
+      "\\" ["]
     end
 
     rule c2
@@ -462,11 +462,11 @@ module Poison
     end
 
     rule space
-      ' ' / '\f' / '\v' / '\t'
+      ' ' / "\f" / "\v" / "\t"
     end
 
     rule end_of_line
-      '\r\n' / '\n' / '\r'
+      "\r\n" / "\n" / "\r"
     end
 
     rule end_of_file
