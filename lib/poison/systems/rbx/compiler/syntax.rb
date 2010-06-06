@@ -33,34 +33,20 @@ module Poison
     end
 
     class Message < Node
+      def to_sexp(sexp)
+        sexp << [:message, [text_value, nil, nil]]
+      end
     end
 
     class Value < Node
       def to_sexp(sexp)
         exp = [:value]
-        [:nil, :true, :false, :hex, :int, :real, :imag, :string].each do |sym|
-          m = :"#{sym}_value"
-          if respond_to? m
-            send(m).to_sexp exp
-            break
-          end
-        end
+        elements_to_sexp exp
         sexp << exp
       end
     end
 
     class Literal < Node
-      attr_accessor :value
-
-      def self.from(text)
-        node = allocate
-        node.value = text
-        node
-      end
-
-      def to_sexp(sexp)
-        sexp << [value, nil, nil]
-      end
     end
 
     class NilKind < Literal
@@ -72,9 +58,9 @@ module Poison
     class Boolean < Literal
       def to_sexp(sexp)
         exp = [nil, nil]
-        if value == "true"
+        if text_value == "true"
           exp.unshift true
-        elsif value == "false"
+        elsif text_value == "false"
           exp.unshift false
         end
         sexp << exp
@@ -83,20 +69,26 @@ module Poison
 
     class Integer < Literal
       def to_sexp(sexp)
-        sexp << [Integer(value), nil, nil]
+        sexp << [Integer(text_value), nil, nil]
       end
     end
 
     class Real < Literal
       def to_sexp(sexp)
-        sexp << [value.to_f, nil, nil]
+        sexp << [text_value.to_f, nil, nil]
       end
     end
 
     class Imaginary < Literal
+      def to_sexp(sexp)
+        sexp << [text_value, nil, nil]
+      end
     end
 
     class String < Literal
+      def to_sexp(sexp)
+        sexp << [text_value[1..-2], nil, nil]
+      end
     end
   end
 end

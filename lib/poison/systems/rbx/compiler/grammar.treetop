@@ -165,51 +165,15 @@ module Poison
     end
 
     rule immed
-      nil {
-        def nil_value
-          Syntax::NilKind.from text_value
-        end
-      }
-      / true {
-        def true_value
-          Syntax::Boolean.from text_value
-        end
-      }
-      / false {
-        def false_value
-          Syntax::Boolean.from text_value
-        end
-      }
-      / hex {
-        def int_value
-          Syntax::Integer.from text_value
-        end
-      }
-      / imag {
-        def imag_value
-          Syntax::Imaginary.from text_value
-        end
-      }
-      / real {
-        def real_value
-          Syntax::Real.from text_value
-        end
-      }
-      / int {
-        def int_value
-          Syntax::Integer.from text_value
-        end
-      }
-      / str1 {
-        def string_value
-          Syntax::String.from text_value[1..-2]
-        end
-      }
-      / str2 {
-        def string_value
-          Syntax::String.from text_value[1..-2]
-        end
-      }
+      nil <Syntax::NilKind>
+      / true <Syntax::Boolean>
+      / false <Syntax::Boolean>
+      / imag <Syntax::Imaginary>
+      / real <Syntax::Real>
+      / hex <Syntax::Integer>
+      / int <Syntax::Integer>
+      / str1 <Syntax::String>
+      / str2 <Syntax::String>
     end
 
     rule utfw
