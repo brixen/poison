@@ -164,6 +164,8 @@ module Poison
       / lick
     end
 
+    # TODO: these should be called literals not immediates
+    # as that has an implementation connotation
     rule immed
       nil <Syntax::NilKind>
       / true <Syntax::Boolean>

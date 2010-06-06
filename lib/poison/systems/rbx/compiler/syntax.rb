@@ -33,8 +33,12 @@ module Poison
     end
 
     class Message < Node
+      def value
+        text_value.strip
+      end
+
       def to_sexp(sexp)
-        sexp << [:message, [text_value, nil, nil]]
+        sexp << [:message, [value, nil, nil]]
       end
     end
 
