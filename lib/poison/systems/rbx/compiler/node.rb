@@ -1,14 +1,11 @@
 module Poison
   class Treetop::Runtime::SyntaxNode
-    def elements_to_sexp(sexp)
-      elements.each { |e| e.to_sexp(sexp) unless e.terminal? }
+    def node
+      return unless elements
+      all = elements.map { |e| e.node if e }.compact
+      return if all.empty?
+      return all.first if all.size == 1
+      all
     end
-
-    def to_sexp(sexp)
-      elements_to_sexp sexp
-    end
-  end
-
-  class Node < Treetop::Runtime::SyntaxNode
   end
 end

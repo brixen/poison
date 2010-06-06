@@ -3,13 +3,27 @@
 module Poison
   grammar Grammar
     rule poison
-      hh statements end_of_file <Syntax::Script>
+      hh s:statements end_of_file {
+        def node
+          Syntax::Script.new s.node
+        end
+      }
     end
 
     rule statements
       s1:stmt
-      (sep s2:stmt)* sep? <Syntax::Statements>
-      / '' <Syntax::NilKind>
+      (sep s2:stmt)* sep? {
+        def node
+          stmts = respond_to?(:s2) ? Array(s2.node) : []
+          stmts.unshift s1.node
+          Syntax::Statements.new stmts
+        end
+      }
+      / '' {
+        def node
+          Syntax::NilKind.new
+        end
+      }
     end
 
     rule stmt
@@ -19,21 +33,25 @@ module Poison
     end
 
     rule sets
-      e:eqs
-      ( assign s:sets
-      / o:or assign s:sets
-      / and assign s:sets
-      / pipe assign s:sets
-      / caret assign s:sets
-      / amp assign s:sets
-      / bitl assign s:sets
-      / bitr assign s:sets
-      / plus assign s:sets
-      / minus assign s:sets
-      / times assign s:sets
-      / div assign s:sets
-      / rem assign s:sets
-      / pow assign s:sets )?
+      e:eqs         assign s:sets {
+        def node
+          Syntax::Assign.new e.node, s.node
+        end
+      }
+      / e:eqs o:or    assign s:sets
+      / e:eqs o:and   assign s:sets
+      / e:eqs o:pipe  assign s:sets
+      / e:eqs o:caret assign s:sets
+      / e:eqs o:amp   assign s:sets
+      / e:eqs o:bitl  assign s:sets
+      / e:eqs o:bitr  assign s:sets
+      / e:eqs o:plus  assign s:sets
+      / e:eqs o:minus assign s:sets
+      / e:eqs o:times assign s:sets
+      / e:eqs o:div   assign s:sets
+      / e:eqs o:rem   assign s:sets
+      / e:eqs o:pow   assign s:sets
+      / eqs
     end
 
     rule eqs
@@ -70,7 +88,7 @@ module Poison
 
     rule sum
       p:product
-      ( plus x:product <Plus>
+      ( plus x:product
       / minus x:product )*
     end
 
@@ -87,14 +105,18 @@ module Poison
       / plus !plus s:sign
       / not s:sign
       / wavy s:sign
-      / expr
+      / expr {
+        def node
+          Syntax::Expression.new elements.map { |e| e.node }.flatten.compact
+        end
+      }
     end
 
     rule expr
       ( mminus a:atom
       / pplus a:atom
       / a:atom (pplus / mminus)?)
-        (call)* <Syntax::Expression>
+      (call)*
     end
 
     rule atom
@@ -156,26 +178,70 @@ module Poison
     end
 
     rule message
-      utfw+ h <Syntax::Message>
+      u:utfw+ h {
+        def node
+          Syntax::Message.new u.text_value
+        end
+      }
     end
 
     rule value
-      immed h <Syntax::Value>
+      i:immed h {
+        def node
+          Syntax::Value.new i.node
+        end
+      }
       / lick
     end
 
     # TODO: these should be called literals not immediates
     # as that has an implementation connotation
     rule immed
-      nil <Syntax::NilKind>
-      / true <Syntax::Boolean>
-      / false <Syntax::Boolean>
-      / imag <Syntax::Imaginary>
-      / real <Syntax::Real>
-      / hex <Syntax::Integer>
-      / int <Syntax::Integer>
-      / str1 <Syntax::String>
-      / str2 <Syntax::String>
+      nil {
+        def node
+          Syntax::NilKind.new
+        end
+      }
+      / true {
+        def node
+          Syntax::Boolean.new true
+        end
+      }
+      / false {
+        def node
+          Syntax::Boolean.new false
+        end
+      }
+      / imag {
+        def node
+          Syntax::Imaginary.new text_value
+        end
+      }
+      / real {
+        def node
+          Syntax::Real.new text_value.to_f
+        end
+      }
+      / hex {
+        def node
+          Syntax::Integer.new Integer(text_value)
+        end
+      }
+      / int {
+        def node
+          Syntax::Integer.new Integer(text_value)
+        end
+      }
+      / str1 {
+        def node
+          Syntax::String.new text_value[1..-2]
+        end
+      }
+      / str2 {
+        def node
+          Syntax::String.new text_value[1..-2]
+        end
+      }
     end
 
     rule utfw

@@ -6,11 +6,7 @@ module Poison
     end
 
     def parse
-      begin
-        @syntax = @parser.parse @source
-      rescue => e
-        raise SyntaxError.new(e)
-      end
+      @syntax = Syntax.new @parser.parse(@source)
 
       unless @syntax
         raise SyntaxError.new(@parser.failure_reason)
