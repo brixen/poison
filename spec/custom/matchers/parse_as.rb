@@ -1,5 +1,3 @@
-require 'pp'
-
 class ParseAsMatcher
   def initialize(expected)
     @expected = expected
@@ -11,8 +9,8 @@ class ParseAsMatcher
   end
 
   def failure_message
-    ["Expected:\n#{@actual.pretty_inspect}\n",
-     "to equal:\n#{@expected.pretty_inspect}"]
+    ["Expected:\n#{@actual.inspect}\n",
+     "to equal:\n#{@expected.inspect}"]
   end
 end
 

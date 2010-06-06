@@ -60,10 +60,8 @@ class PoisonScript
   def asts
     return if @asts.empty?
 
-    require 'pp'
-
     compiler = Poison::Compiler.new @asts.join("\n")
-    pp compiler.parse.to_sexp
+    p compiler.parse.to_sexp
   end
 
   def script
