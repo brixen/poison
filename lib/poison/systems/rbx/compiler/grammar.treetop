@@ -38,19 +38,97 @@ module Poison
           Syntax::Assign.new e.node, s.node
         end
       }
-      / e:eqs o:or    assign s:sets
-      / e:eqs o:and   assign s:sets
-      / e:eqs o:pipe  assign s:sets
-      / e:eqs o:caret assign s:sets
-      / e:eqs o:amp   assign s:sets
-      / e:eqs o:bitl  assign s:sets
-      / e:eqs o:bitr  assign s:sets
-      / e:eqs o:plus  assign s:sets
-      / e:eqs o:minus assign s:sets
-      / e:eqs o:times assign s:sets
-      / e:eqs o:div   assign s:sets
-      / e:eqs o:rem   assign s:sets
-      / e:eqs o:pow   assign s:sets
+      / e:eqs o:or    assign s:sets {
+        def node
+          expr = e.node
+          op = Syntax::Or.new expr, s.node
+          Syntax::Assign.new expr, op
+        end
+      }
+      / e:eqs o:and   assign s:sets {
+        def node
+          expr = e.node
+          op = Syntax::And.new expr, s.node
+          Syntax::Assign.new expr, op
+        end
+      }
+      / e:eqs o:pipe  assign s:sets {
+        def node
+          expr = e.node
+          op = Syntax::Pipe.new expr, s.node
+          Syntax::Assign.new expr, op
+        end
+      }
+      / e:eqs o:caret assign s:sets {
+        def node
+          expr = e.node
+          op = Syntax::Caret.new expr, s.node
+          Syntax::Assign.new expr, op
+        end
+      }
+      / e:eqs o:amp   assign s:sets {
+        def node
+          expr = e.node
+          op = Syntax::Amp.new expr, s.node
+          Syntax::Assign.new expr, op
+        end
+      }
+      / e:eqs o:bitl  assign s:sets {
+        def node
+          expr = e.node
+          op = Syntax::Bitl.new expr, s.node
+          Syntax::Assign.new expr, op
+        end
+      }
+      / e:eqs o:bitr  assign s:sets {
+        def node
+          expr = e.node
+          op = Syntax::Bitr.new expr, s.node
+          Syntax::Assign.new expr, op
+        end
+      }
+      / e:eqs o:plus  assign s:sets {
+        def node
+          expr = e.node
+          op = Syntax::Plus.new expr, s.node
+          Syntax::Assign.new expr, op
+        end
+      }
+      / e:eqs o:minus assign s:sets {
+        def node
+          expr = e.node
+          op = Syntax::Minus.new expr, s.node
+          Syntax::Assign.new expr, op
+        end
+      }
+      / e:eqs o:times assign s:sets {
+        def node
+          expr = e.node
+          op = Syntax::Times.new expr, s.node
+          Syntax::Assign.new expr, op
+        end
+      }
+      / e:eqs o:div   assign s:sets {
+        def node
+          expr = e.node
+          op = Syntax::Div.new expr, s.node
+          Syntax::Assign.new expr, op
+        end
+      }
+      / e:eqs o:rem   assign s:sets {
+        def node
+          expr = e.node
+          op = Syntax::Rem.new expr, s.node
+          Syntax::Assign.new expr, op
+        end
+      }
+      / e:eqs o:pow   assign s:sets {
+        def node
+          expr = e.node
+          op = Syntax::Pow.new expr, s.node
+          Syntax::Assign.new expr, op
+        end
+      }
       / eqs
     end
 

@@ -52,14 +52,92 @@ module Poison
       end
     end
 
-    class Or < Node
+    class BinaryOperator
       def initialize(left, right)
         @left = left
         @right = right
       end
 
       def to_sexp
-        [:or, @left.to_sexp, @right.to_sexp]
+        [sexp_name, @left.to_sexp, @right.to_sexp]
+      end
+    end
+
+    class Or < BinaryOperator
+      def sexp_name
+        :or
+      end
+    end
+
+    class And < BinaryOperator
+      def sexp_name
+        :and
+      end
+    end
+
+    class Pipe < BinaryOperator
+      def sexp_name
+        :pipe
+      end
+    end
+
+    class Caret < BinaryOperator
+      def sexp_name
+        :caret
+      end
+    end
+
+    class Amp < BinaryOperator
+      def sexp_name
+        :amp
+      end
+    end
+
+    class Bitl < BinaryOperator
+      def sexp_name
+        :bitl
+      end
+    end
+
+    class Bitr < BinaryOperator
+      def sexp_name
+        :bitr
+      end
+    end
+
+    class Plus < BinaryOperator
+      def sexp_name
+        :plus
+      end
+    end
+
+    class Minus < BinaryOperator
+      def sexp_name
+        :minus
+      end
+    end
+
+    class Times < BinaryOperator
+      def sexp_name
+        :times
+      end
+    end
+
+    class Div < BinaryOperator
+      def sexp_name
+        :div
+      end
+    end
+
+    class Rem < BinaryOperator
+      def sexp_name
+        :rem
+      end
+    end
+
+    class Pow < BinaryOperator
+      def sexp_name
+        :pow
       end
     end
 
