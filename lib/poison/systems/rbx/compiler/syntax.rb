@@ -10,8 +10,16 @@ module Poison
       @syntax.to_sexp
     end
 
+    def graph
+      @syntax.graph
+    end
+
     class Node
       def to_sexp
+      end
+
+      def graph
+        Rubinius::AST::AsciiGrapher.new(self, Node).print
       end
     end
 

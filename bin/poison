@@ -12,6 +12,8 @@ class PoisonScript
     @asts = []
     @sexps = []
     @parses = []
+    @source = nil
+    @script = nil
   end
 
   def options(argv=ARGV)
@@ -59,7 +61,7 @@ class PoisonScript
     options.doc ""
 
     rest = options.parse(argv)
-    @source ||= rest.first
+    @script ||= rest.first
   end
 
   def evals
@@ -91,7 +93,8 @@ class PoisonScript
   def script
     return unless @script
 
-    if File.exists? @scrip
+    if File.exists? @script
+
       Poison::CodeLoader.execute_file @script
     else
       STDERR.puts "Unable to find '#{@script}' to run"
