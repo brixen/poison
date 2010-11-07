@@ -20,8 +20,10 @@ parser_c = parser_d + "/parser.c"
 parser_o = parser_d + "/parser.o"
 parser_e = parser_d + "/parser.#{dlext}"
 
-file parser_c => parser_g do |t|
-  sh "tools/greg #{t.prerequisites.first} > #{t.name}"
+greg     = File.expand_path "../tools/greg", __FILE__
+
+file parser_c => [greg, parser_g] do |t|
+  sh "tools/greg #{t.prerequisites.last} > #{t.name}"
 end
 
 file parser_o => parser_c do |t|
@@ -40,7 +42,12 @@ task :build => [:parser, parser_e]
 
 desc "Clean the parser extension files"
 task :clean do
-  rm_f Dir[parser_d + "/{*.o,*.#{dlext}}"]
+  rm_f Dir[parser_d + "/{parser.c,*.o,*.#{dlext}}"]
+end
+
+desc "Build greg parser generator"
+file greg do
+  sh "#{CC} -O3 -DNDEBUG -o tools/greg tools/greg.c tools/compile.c tools/tree.c -Itools"
 end
 
 spec = Gem::Specification.new do |s|
