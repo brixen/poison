@@ -1,1 +1,1 @@
-require 'poison/systems/rbx'
+require 'poison/bootstrap'

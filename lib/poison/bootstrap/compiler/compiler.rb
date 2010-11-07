@@ -4,8 +4,8 @@ module Poison
       unless @treetop_parser
         require 'rubygems'
         require 'treetop'
-        require 'poison/systems/rbx/compiler/grammar'
-        require 'poison/systems/rbx/compiler/node'
+        require 'poison/bootstrap/compiler/grammar'
+        require 'poison/bootstrap/compiler/node'
         @treetop_parser = GrammarParser
       end
 

@@ -9,8 +9,8 @@ end
 
 task :default => :spec
 
-parser = "lib/poison/systems/rbx/compiler/grammar.rb"
-file parser => "lib/poison/systems/rbx/compiler/grammar.treetop" do |t|
+parser = "lib/poison/bootstrap/compiler/grammar.rb"
+file parser => "lib/poison/bootstrap/compiler/grammar.treetop" do |t|
   sh "tt #{t.prerequisites.first}"
 end
 
