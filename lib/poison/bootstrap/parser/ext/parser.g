@@ -6,16 +6,32 @@
 #
 
 %{
+
 #include "ruby.h"
+#include "parser.h"
+
+#define YY_INPUT(buf, result, max) {  \
+  if (P->pos < P->size) {             \
+    result = max;                     \
+    if(P->pos + max > P->size)        \
+      result = P->size - P->pos;      \
+    memcpy(buf, P->bytes, result+1);  \
+    P->pos += max;                    \
+  } else {                            \
+    result = 0;                       \
+  }                                   \
+}
 
 #define YYSTYPE VALUE
+#define YY_XTYPE Poison*
+#define YY_XVAR P
+#define YY_NAME(N) poison_code_##N
 
 %}
 
-potion = -- s:statements end-of-file { $$ = rb_funcall(rb_cObject,
-rb_intern("p"), rb_str_new2("we got called")); }
+poison = -- s:statements end-of-file { rb_funcall(P->parser, rb_intern("success!"), 0); }
 
-statements = true
+statements = true --
 
 utfw = [A-Za-z0-9_$@;`{}]
      | '\304' [\250-\277]
@@ -41,14 +57,27 @@ true = "true" !utfw
 
 %%
 
-VALUE poison_parse_file(void) {
-  return rb_intern("parsed");
+VALUE poison_parse(VALUE self, VALUE string) {
+  Poison P;
+
+  P.parser = self;
+  P.pos = 0;
+  P.size = RSTRING_LEN(string);
+  P.bytes = RSTRING_PTR(string);
+
+  VALUE result = Qtrue;
+  GREG *G = poison_code_parse_new(&P);
+  G->pos = G->limit = 0;
+
+  if (!poison_code_parse(G)) result = Qfalse;
+  poison_code_parse_free(G);
+
+  return result;
 }
 
 void Init_parser(void) {
   VALUE rb_mPoison = rb_const_get(rb_cObject, rb_intern("Poison"));
   VALUE rb_cParser = rb_const_get(rb_mPoison, rb_intern("Parser"));
 
-  rb_define_method(rb_cParser, "parse_file",
-      RUBY_METHOD_FUNC(poison_parse_file), 0);
+  rb_define_method(rb_cParser, "parse", RUBY_METHOD_FUNC(poison_parse), 1);
 }
