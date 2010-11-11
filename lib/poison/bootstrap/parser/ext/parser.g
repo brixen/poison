@@ -27,8 +27,10 @@
 #define YY_XVAR P
 #define YY_NAME(N) poison_code_##N
 
-#define PN_VAL(n)     rb_funcall(P->parser, rb_intern(n), 0)
-#define PN_AST(n, v)  rb_funcall(P->parser, rb_intern(n), 1, v)
+#define PN_VAL(n)         rb_funcall(P->parser, rb_intern(n), 0)
+#define PN_AST(n, v)      rb_funcall(P->parser, rb_intern(n), 1, v)
+#define PN_AST2(n, x, y)  rb_funcall(P->parser, rb_intern(n), 2, x, y)
+#define PN_OP(n, l, r)    rb_funcall(P->parser, rb_intern(n), 2, l, r)
 
 %}
 
@@ -45,21 +47,21 @@ stmt = s:sets
        {  }
 
 sets = e:eqs
-       ( assign s:sets       {  }
-       | or assign s:sets    {  }
-       | and assign s:sets   {  }
-       | pipe assign s:sets  {  }
-       | caret assign s:sets {  }
-       | amp assign s:sets   {  }
-       | bitl assign s:sets  {  }
-       | bitr assign s:sets  {  }
-       | plus assign s:sets  {  }
-       | minus assign s:sets {  }
-       | times assign s:sets {  }
-       | div assign s:sets   {  }
-       | rem assign s:sets   {  }
-       | pow assign s:sets   {  })?
-       {  }
+       ( assign s:sets       { e = PN_OP("assign", e, s); }
+       | or assign s:sets    { e = PN_OP("assign", e, PN_OP("op_or", e, s)); }
+       | and assign s:sets   { e = PN_OP("assign", e, PN_OP("op_and", e, s)); }
+       | pipe assign s:sets  { e = PN_OP("assign", e, PN_OP("pipe", e, s)); }
+       | caret assign s:sets { e = PN_OP("assign", e, PN_OP("caret", e, s)); }
+       | amp assign s:sets   { e = PN_OP("assign", e, PN_OP("amp", e, s)); }
+       | bitl assign s:sets  { e = PN_OP("assign", e, PN_OP("bitl", e, s)); }
+       | bitr assign s:sets  { e = PN_OP("assign", e, PN_OP("bitr", e, s)); }
+       | plus assign s:sets  { e = PN_OP("assign", e, PN_OP("plus", e, s)); }
+       | minus assign s:sets { e = PN_OP("assign", e, PN_OP("minus", e, s)); }
+       | times assign s:sets { e = PN_OP("assign", e, PN_OP("times", e, s)); }
+       | div assign s:sets   { e = PN_OP("assign", e, PN_OP("div", e, s)); }
+       | rem assign s:sets   { e = PN_OP("assign", e, PN_OP("rem", e, s)); }
+       | pow assign s:sets   { e = PN_OP("assign", e, PN_OP("pow", e, s)); })?
+       { $$ = e; }
 
 eqs = c:cmps
       ( cmp x:cmps          {  }
@@ -107,7 +109,7 @@ sign = minus !minus s:sign   {  }
      | e:expr         {  }
 
 expr = ( a:atom ) { a = PN_AST("call_list", a); }
-         (c:call { a = PN_AST("call_list", c); })*
+         (c:call { a = PN_AST2("call_append", a, c); })*
        { $$ = PN_AST("expr", a); }
 
 atom = e:value | e:closure | e:table | e:call
@@ -142,7 +144,7 @@ block = block-start s:statements block-end {  }
 lick = lick-start i:lick-items lick-end {  }
 
 path = '/' m:message    { $$ = PN_AST("path", m); }
-message = < utfw+ > -   { $$ = PN_AST("message", rb_str_new(yytext, yyleng)); }
+message = < utfw+ > -   { $$ = rb_str_new(yytext, yyleng); }
 
 value = i:immed - { $$ = PN_AST("value", i); }
       | lick

@@ -27,7 +27,12 @@ module Poison
     end
 
     def call_list(expr)
+      @call_list = []
       @call_list << expr
+    end
+
+    def call_append(expr, value)
+      expr << value
     end
 
     def nil_kind
@@ -84,6 +89,62 @@ module Poison
       else
         Syntax::Message.new name
       end
+    end
+
+    def assign(name, value)
+      Syntax::Assign.new name, value
+    end
+
+    def op_or(left, right)
+      Syntax::Or.new left, right
+    end
+
+    def op_and(left, right)
+      Syntax::And.new left, right
+    end
+
+    def pipe(left, right)
+      Syntax::Pipe.new left, right
+    end
+
+    def caret(left, right)
+      Syntax::Caret.new left, right
+    end
+
+    def amp(left, right)
+      Syntax::Amp.new left, right
+    end
+
+    def bitl(left, right)
+      Syntax::BitLeft.new left, right
+    end
+
+    def bitr(left, right)
+      Syntax::BitRight.new left, right
+    end
+
+    def plus(left, right)
+      Syntax::Plus.new left, right
+    end
+
+    def minus(left, right)
+      Syntax::Minus.new left, right
+    end
+
+    def times(left, right)
+      Syntax::Times.new left, right
+    end
+
+    def div(left, right)
+      Syntax::Div.new left, right
+    end
+
+    def rem(left, right)
+      Syntax::Rem.new left, right
+    end
+
+    def pow(left, right)
+      Syntax::Pow.new left, right
     end
 
     def method_missing(sym, *args)
