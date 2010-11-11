@@ -32,9 +32,15 @@ module Poison
     end
 
     class Imaginary < Literal
+      def to_sexp
+        ["#{@value}i", nil, nil]
+      end
     end
 
-    class String < Literal
+    class UnescapedString < Literal
+    end
+
+    class EscapedString < Literal
     end
 
     class NilKind < Literal

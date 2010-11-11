@@ -106,7 +106,7 @@ sign = minus !minus s:sign   {  }
      | plus !plus s:sign     {  }
      | not s:sign     {  }
      | wavy s:sign    {  }
-     | e:expr         {  }
+     | e:expr         { $$ = e; }
 
 expr = ( a:atom ) { a = PN_AST("call_list", a); }
          (c:call { a = PN_AST2("call_append", a, c); })*
@@ -177,8 +177,6 @@ lick-start = '[' --
 lick-end = ']' -
 quiz = '?' --
 assign = '=' --
-pplus = "++" -
-mminus = "--" -
 minus = '-' --
 plus = '+' --
 wavy = '~' --
@@ -214,10 +212,10 @@ real = < digits '.' digits ('e' [-+]? [0-9]+)? >
 imag = (real | int) 'i'
 
 q1 = [']
-c1 = < (!q1 utf8)+ > {  }
-str1 = q1 {  }
-       < (q1 q1 {  } | c1)* >
-       q1 {  }
+c1 = < (!q1 utf8)+ > { PN_AST("str1_add", rb_str_new(yytext, yyleng)); }
+str1 = q1 { PN_AST("str1_clear", Qnil); }
+       < (q1 q1 { PN_AST("str1_add", rb_str_new2("'")); } | c1)* >
+       q1 { $$ = PN_AST("str1", Qnil); }
 
 esc         = '\\'
 escn        = esc 'n' {  }
@@ -229,11 +227,11 @@ escu        = esc 'u' < hexl hexl hexl hexl > { }
 escc = esc < utf8 > {  }
 
 q2 = ["]
-e2 = '\\' ["] {  }
-c2 = < (!q2 !esc utf8)+ > {  }
-str2 = q2 {  }
+e2 = '\\' ["] { PN_AST("str2_add", rb_str_new2("\"")); }
+c2 = < (!q2 !esc utf8)+ > { PN_AST("str2_add", rb_str_new(yytext, yyleng)); }
+str2 = q2 { PN_AST("str2_clear", Qnil); }
        < (e2 | escn | escb | escf | escr | esct | escu | escc | c2)* >
-       q2 {  }
+       q2 { $$ = PN_AST("str2", Qnil); }
 
 unq-char = '{' unq-char+ '}'
          | '[' unq-char+ ']'

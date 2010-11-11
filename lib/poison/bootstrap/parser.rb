@@ -2,7 +2,8 @@ module Poison
   class Parser
     def initialize
       @statements = []
-      @call_list = []
+      @call_list  = []
+      @str1       = ""
     end
 
     # The #parse method is defined in the parser C extension.
@@ -145,6 +146,30 @@ module Poison
 
     def pow(left, right)
       Syntax::Pow.new left, right
+    end
+
+    def str1(ignored)
+      Syntax::UnescapedString.new @str1
+    end
+
+    def str1_clear(ignored)
+      @str1 = ""
+    end
+
+    def str1_add(string)
+      @str1 << string
+    end
+
+    def str2(ignored)
+      Syntax::EscapedString.new @str2
+    end
+
+    def str2_clear(ignored)
+      @str2 = ""
+    end
+
+    def str2_add(string)
+      @str2 << string
     end
 
     def method_missing(sym, *args)
