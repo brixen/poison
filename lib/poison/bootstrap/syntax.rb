@@ -1,6 +1,8 @@
 require 'poison/bootstrap/syntax/node'
 require 'poison/bootstrap/syntax/value'
 require 'poison/bootstrap/syntax/expression'
+require 'poison/bootstrap/syntax/operator'
+require 'poison/bootstrap/syntax/message'
 
 module Poison
   module Syntax
@@ -52,17 +54,6 @@ module Poison
 
       def to_sexp
         [:assign, @left.to_sexp, @right.to_sexp]
-      end
-    end
-
-    class BinaryOperator
-      def initialize(left, right)
-        @left = left
-        @right = right
-      end
-
-      def to_sexp
-        [sexp_name, @left.to_sexp, @right.to_sexp]
       end
     end
 
@@ -141,18 +132,6 @@ module Poison
     class Pow < BinaryOperator
       def sexp_name
         :pow
-      end
-    end
-
-    class Message < Node
-      attr_accessor :name
-
-      def initialize(name)
-        @name = name
-      end
-
-      def to_sexp
-        [:message, [@name, nil, nil]]
       end
     end
 

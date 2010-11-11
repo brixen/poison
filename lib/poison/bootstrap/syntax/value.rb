@@ -12,22 +12,32 @@ module Poison
       end
     end
 
-    class Boolean < Value
+    class Literal < Node
+      def initialize(value)
+        @value = value
+      end
+
+      def to_sexp
+        [@value, nil, nil]
+      end
     end
 
-    class Integer < Value
+    class Boolean < Literal
     end
 
-    class Real < Value
+    class Integer < Literal
     end
 
-    class Imaginary < Value
+    class Real < Literal
     end
 
-    class String < Value
+    class Imaginary < Literal
     end
 
-    class NilKind < Value
+    class String < Literal
+    end
+
+    class NilKind < Literal
       def initialize
         @value = nil
       end

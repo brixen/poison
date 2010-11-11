@@ -34,10 +34,10 @@
 
 poison = -- s:statements end-of-file { $$ = P->ast = PN_AST("statements", s); }
 
-statements = s1:stmt {  }
-        (sep s2:stmt {  })*
+statements = s1:stmt { $$ = PN_AST("statement", s1); }
+        (sep s2:stmt { $$ = PN_AST("statement", s2); })*
          sep?
-     | ''            { $$ = PN_VAL("nil_kind"); }
+     | ''            { $$ = PN_AST("statement", Qnil); }
 
 stmt = s:sets
        ( or x:sets          {  }
@@ -106,24 +106,21 @@ sign = minus !minus s:sign   {  }
      | wavy s:sign    {  }
      | e:expr         {  }
 
-expr = ( mminus a:atom {  }
-       | pplus a:atom   {  }
-       | a:atom (pplus  {  }
-               | mminus {  })?) {  }
-         (c:call {  })*
-       {  }
+expr = ( a:atom ) { a = PN_AST("call_list", a); }
+         (c:call { a = PN_AST("call_list", c); })*
+       { $$ = PN_AST("expr", a); }
 
 atom = e:value | e:closure | e:table | e:call
 
-call = (n:name {  } (v:value | v:table)? |
-       (v:value | v:table) {  })
-         b:block? {  }
+call = (n:name { v = Qnil; b = Qnil; } (v:value | v:table)? |
+       (v:value | v:table) { n = PN_AST("message", Qnil); b = Qnil; })
+         b:block? { $$ = n;   }
 
-name = p:path           {  }
-     | quiz ( m:message {  }
-            | p:path    {  })
+name = p:path           { $$ = PN_AST("path", p); }
+     | quiz ( m:message { $$ = PN_AST("query", m); }
+            | p:path    { $$ = PN_AST("pathq", p); })
      | !keyword
-       m:message        {  }
+       m:message        { $$ = PN_AST("message", m); }
 
 lick-items = i1:lick-item     {  }
             (sep i2:lick-item {  })*
@@ -137,7 +134,7 @@ lick-item = m:message t:table v:loose {  }
           | m:message         {  }
 
 loose = value
-      | v:unquoted {  }
+      | v:unquoted { $$ = PN_AST("value", v); }
 
 closure = t:table? b:block {  }
 table = table-start s:statements table-end {  }
@@ -147,7 +144,7 @@ lick = lick-start i:lick-items lick-end {  }
 path = '/' m:message    { $$ = PN_AST("path", m); }
 message = < utfw+ > -   { $$ = PN_AST("message", rb_str_new(yytext, yyleng)); }
 
-value = i:immed - {  }
+value = i:immed - { $$ = PN_AST("value", i); }
       | lick
 
 immed = nil    { $$ = PN_VAL("nil_kind"); }
