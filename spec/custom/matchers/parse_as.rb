@@ -4,7 +4,7 @@ class ParseAsMatcher
   end
 
   def matches?(actual)
-    @actual = Poison::Parser.new.parse_string(actual).to_sexp.last
+    @actual = Poison::Parser.new.parse(actual).to_sexp.last
     @actual == @expected
   end
 

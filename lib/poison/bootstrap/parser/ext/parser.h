@@ -14,6 +14,7 @@ typedef struct PoisonParserState {
   unsigned int size;
   char*        bytes;
   VALUE        parser;
+  VALUE        ast;
 } Poison;
 
 VALUE poison_parse(VALUE self, VALUE string);

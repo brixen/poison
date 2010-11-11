@@ -1,7 +1,11 @@
-module Poison
-  class SyntaxError < Exception; end
+require 'poison/bootstrap/syntax/node'
+require 'poison/bootstrap/syntax/value'
+require 'poison/bootstrap/syntax/expression'
 
-  class Syntax
+module Poison
+  module Syntax
+    class SyntaxError < Exception; end
+
     def initialize(parse_tree)
       @syntax = parse_tree.node
     end
@@ -12,15 +16,6 @@ module Poison
 
     def graph
       @syntax.graph
-    end
-
-    class Node
-      def to_sexp
-      end
-
-      def graph
-        Rubinius::AST::AsciiGrapher.new(self, Node).print
-      end
     end
 
     class Script < Node
@@ -37,7 +32,7 @@ module Poison
 
     class Statements < Node
       def initialize(statements)
-        @statements = statements
+        @statements = Array(statements)
       end
 
       def to_sexp
@@ -149,18 +144,6 @@ module Poison
       end
     end
 
-    class Expression < Node
-      attr_accessor :expression
-
-      def initialize(expression)
-        @expression = expression
-      end
-
-      def to_sexp
-        [:expr].concat @expression.map { |e| e.to_sexp }
-      end
-    end
-
     class Message < Node
       attr_accessor :name
 
@@ -173,49 +156,6 @@ module Poison
       end
     end
 
-    class Value < Node
-      attr_accessor :value
 
-      def initialize(value)
-        @value = value
-      end
-
-      def to_sexp
-        [:value, @value.to_sexp]
-      end
-    end
-
-    class Literal < Node
-      attr_accessor :value
-
-      def initialize(value)
-        @value = value
-      end
-
-      def to_sexp
-        [@value, nil, nil]
-      end
-    end
-
-    class NilKind < Literal
-      def initialize
-        @value = nil
-      end
-    end
-
-    class Boolean < Literal
-    end
-
-    class Integer < Literal
-    end
-
-    class Real < Literal
-    end
-
-    class Imaginary < Literal
-    end
-
-    class String < Literal
-    end
   end
 end

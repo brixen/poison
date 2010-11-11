@@ -12,20 +12,48 @@ module Poison
 
     # Parsing callbacks
 
+    def syntax_error
+      raise Syntax::SyntaxError
+    end
+
+    def statements(values)
+      Syntax::Statements.new values
+    end
+
+    def nil_kind
+      Syntax::NilKind.new
+    end
+
+    def true_kind
+      Syntax::Boolean.new true
+    end
+
+    def false_kind
+      Syntax::Boolean.new false
+    end
+
     def imag(value)
-      value + 'i'
+      Syntax::Imaginary.new value.to_f
     end
 
     def real(value)
-      value.to_f
+      Syntax::Real.new value.to_f
     end
 
     def hex(value)
-      value.to_i 16
+      Syntax::Integer.new value.to_i 16
     end
 
     def int(value)
-      value.to_i 10
+      Syntax::Integer.new value.to_i 10
+    end
+
+    def path(name)
+      "/" + name
+    end
+
+    def message(name)
+      name
     end
 
     def method_missing(sym, *args)

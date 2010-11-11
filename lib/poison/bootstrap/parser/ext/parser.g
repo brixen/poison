@@ -27,17 +27,17 @@
 #define YY_XVAR P
 #define YY_NAME(N) poison_code_##N
 
+#define PN_VAL(n)     rb_funcall(P->parser, rb_intern(n), 0)
 #define PN_AST(n, v)  rb_funcall(P->parser, rb_intern(n), 1, v)
 
 %}
 
-poison = -- s:statements end-of-file { $$ = rb_funcall(P->parser,
-rb_intern("result"), 1, s); }
+poison = -- s:statements end-of-file { $$ = P->ast = PN_AST("statements", s); }
 
 statements = s1:stmt {  }
         (sep s2:stmt {  })*
          sep?
-     | ''            { $$ = Qnil; }
+     | ''            { $$ = PN_VAL("nil_kind"); }
 
 stmt = s:sets
        ( or x:sets          {  }
@@ -144,15 +144,15 @@ table = table-start s:statements table-end {  }
 block = block-start s:statements block-end {  }
 lick = lick-start i:lick-items lick-end {  }
 
-path = '/' message      {  }
-message = < utfw+ > -   {  }
+path = '/' m:message    { $$ = PN_AST("path", m); }
+message = < utfw+ > -   { $$ = PN_AST("message", rb_str_new(yytext, yyleng)); }
 
 value = i:immed - {  }
       | lick
 
-immed = nil    { $$ = Qnil; }
-      | true   { $$ = Qtrue; }
-      | false  { $$ = Qfalse; }
+immed = nil    { $$ = PN_VAL("nil_kind"); }
+      | true   { $$ = PN_VAL("true_kind"); }
+      | false  { $$ = PN_VAL("false_kind"); }
       | imag   { $$ = PN_AST("imag", rb_str_new(yytext, yyleng)); }
       | real   { $$ = PN_AST("real", rb_str_new(yytext, yyleng)); }
       | hex    { $$ = PN_AST("hex", rb_str_new(yytext, yyleng)); }
@@ -211,8 +211,8 @@ hexl = [0-9A-Fa-f]
 hex = '0x' < hexl+ >
 digits = '0' | [1-9] [0-9]*
 int = < digits >
-real = < digits '.' digits ('e' [-+] [0-9]+)? >
-imag = real 'i'
+real = < digits '.' digits ('e' [-+]? [0-9]+)? >
+imag = (real | int) 'i'
 
 q1 = [']
 c1 = < (!q1 utf8)+ > {  }
@@ -276,14 +276,16 @@ VALUE poison_parse(VALUE self, VALUE string) {
   P.size = RSTRING_LEN(string);
   P.bytes = RSTRING_PTR(string);
 
-  VALUE result = Qtrue;
   GREG *G = poison_code_parse_new(&P);
   G->pos = G->limit = 0;
 
-  if (!poison_code_parse(G)) result = Qfalse;
+  if (!poison_code_parse(G)) {
+    rb_funcall(P.parser, rb_intern("syntax_error"), 0);
+    return Qnil;
+  }
   poison_code_parse_free(G);
 
-  return result;
+  return P.ast;
 }
 
 void Init_parser(void) {
