@@ -33,6 +33,8 @@ module Poison
     end
 
     class Statements < Node
+      attr_accessor :statements
+
       def initialize(statements)
         @statements = Array(statements)
       end
@@ -43,6 +45,10 @@ module Poison
         else
           @statements.map { |s| s.to_sexp }
         end
+      end
+
+      def visit(visitor)
+        visitor.statements self
       end
     end
   end

@@ -1,46 +1,62 @@
 module Poison
   class Compiler
-    def self.treetop_parser
-      unless @treetop_parser
-        require 'rubygems'
-        require 'treetop'
-        require 'poison/bootstrap/compiler/grammar'
-        require 'poison/bootstrap/compiler/node'
-        @treetop_parser = GrammarParser
+    attr_reader :g
+
+    def initialize
+      @g = Generator.new
+    end
+
+    def compile(string)
+      ast = Parser.new.parse string
+
+      g.name = :call
+      g.file = :"(poison)"
+      g.set_line 1
+
+      g.required_args = 0
+      g.total_args = 0
+      g.splat_index = nil
+
+      g.local_count = 0
+      g.local_names = []
+
+      ast.visit self
+      g.ret
+      g.close
+
+      g.encode
+      cm = g.package ::Rubinius::CompiledMethod
+      puts cm.decode if $DEBUG
+
+      code = Poison::Code.new
+      ss = ::Rubinius::StaticScope.new Object
+      ::Rubinius.attach_method g.name, cm, ss, code
+
+      code
+    end
+
+    def statements(node)
+      node.statements.each { |s| s.visit self }
+    end
+
+    def expression(node)
+      node.expressions.each { |e| e.visit self }
+    end
+
+    def value(node)
+      node.value.visit self
+    end
+
+    def boolean(node)
+      if node.value
+        g.push_pn_true
+      else
+        g.push_pn_false
       end
-
-      @treetop_parser
     end
 
-    # Sets the parser machine to use. +parser+ should
-    # be :treetop_parser or :pegarus_parser.
-    def self.set_parser(parser)
-      @parser = send parser
-    end
-
-    # Returns the parser that the compiler has been
-    # configured to use. Defaults to :treetop_parser.
-    def self.get_parser
-      @parser ||= treetop_parser
-    end
-
-    set_parser :treetop_parser
-
-    def self.parse_file(file, line=1)
-      compiler = new IO.read(file), line
-      compiler.parse
-    end
-
-    attr_accessor :source, :line, :parser
-
-    def initialize(source, line=1)
-      @source = source
-      @line = line
-      @parser = Parser.new self.class.get_parser, source
-    end
-
-    def parse
-      @parser.parse
+    def message(node)
+      g.pn_send node.name
     end
   end
 end

@@ -17,6 +17,8 @@ module Poison
     end
 
     class Literal < Node
+      attr_accessor :value
+
       def initialize(value)
         @value = value
       end
