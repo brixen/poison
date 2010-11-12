@@ -7,6 +7,9 @@ module Poison
       def graph
         Rubinius::AST::AsciiGrapher.new(self, Node).print
       end
+
+      def visit(visitor)
+      end
     end
   end
 end

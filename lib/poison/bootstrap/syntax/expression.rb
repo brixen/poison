@@ -10,6 +10,10 @@ module Poison
       def to_sexp
         [:expr].concat @expression.map { |e| e.to_sexp }
       end
+
+      def visit(visitor)
+        visitor.expression self
+      end
     end
   end
 end
