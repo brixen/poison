@@ -1,5 +1,8 @@
 module Poison
   class CodeLoader
+    def self.execute(ast)
+    end
+
     def self.execute_file(name)
       source = File.read name
       execute_script source

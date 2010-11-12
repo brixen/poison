@@ -4,15 +4,14 @@
 
 $:.unshift File.expand_path('../../lib', __FILE__)
 
+require 'pp'
 require 'poison'
 
 class PoisonScript
   def initialize
     @evals = []
-    @asts = []
-    @sexps = []
-    @parses = []
-    @source = nil
+    @ast    = false
+    @sexp   = false
     @script = nil
   end
 
@@ -20,15 +19,15 @@ class PoisonScript
     options = Rubinius::Options.new "Usage: poison [options] [script]", 20
 
     options.on "-", "Read and evaluate code from STDIN" do
-      @source = STDIN.read
+      @evals << STDIN.read
     end
 
     options.on "-c", "FILE", "Check the syntax of FILE" do |f|
       begin
         begin
-          Poison::Compiler.parse_file f, 1
-        rescue Poison::SyntaxError => e
-          e.show
+          Poison::Parser.new.parse_file f
+        rescue Poison::Syntax::SyntaxError => e
+          e.render
           exit 1
         end
 
@@ -37,16 +36,12 @@ class PoisonScript
       end
     end
 
-    options.on "-A", "CODE", "Print the AST for CODE" do |code|
-      @asts << code
+    options.on "-A", "Print the AST" do
+      @ast = true
     end
 
-    options.on "-S", "CODE", "Print the S-expression for CODE" do |code|
-      @sexps << code
-    end
-
-    options.on "-P", "CODE", "Print the parse tree for CODE" do |code|
-      @parses << code
+    options.on "-S", "Print the S-expression" do
+      @sexp = true
     end
 
     options.on "-e", "CODE", "Execute CODE" do |e|
@@ -66,28 +61,22 @@ class PoisonScript
 
   def evals
     return if @evals.empty?
-    Poison::CodeLoader.execute_script @evals.join("\n")
-  end
 
-  def parses
-    return if @parses.empty?
+    ast = Poison::Parser.new.parse @evals.join("\n")
 
-    parser = Poison::Compiler.get_parser.new
-    p parser.parse(@parses.join("\n"))
-  end
+    if @ast
+      puts "\n========= AST ========="
+      ast.graph
+      puts "------------------------"
+    end
 
-  def asts
-    return if @asts.empty?
+    if @sexp
+      puts "\n===== S-expression ====="
+      pp ast.to_sexp
+      puts "------------------------"
+    end
 
-    compiler = Poison::Compiler.new @asts.join("\n")
-    p compiler.parse
-  end
-
-  def sexps
-    return if @sexps.empty?
-
-    compiler = Poison::Compiler.new @sexps.join("\n")
-    p compiler.parse.to_sexp
+    Poison::CodeLoader.execute ast
   end
 
   def script
@@ -103,14 +92,12 @@ class PoisonScript
   end
 
   def repl
+    return if @script
   end
 
   def main
     options
     evals
-    asts
-    sexps
-    parses
     script
     repl
   end
