@@ -1,12 +1,21 @@
 module Poison
   class Parser
     def initialize
-      @statements = []
-      @call_list  = []
-      @str1       = ""
+      @error_position = 0
+      @statements     = []
+      @call_list      = []
+      @str1           = ""
+      @str2           = ""
     end
 
     # The #parse method is defined in the parser C extension.
+
+    def parse(string)
+      @string = string
+      ast = parse_string string
+      show_syntax_error unless ast
+      ast
+    end
 
     def parse_file(name)
       string = IO.read name
@@ -15,8 +24,28 @@ module Poison
 
     # Parsing callbacks
 
-    def syntax_error
-      raise Syntax::SyntaxError
+    def show_syntax_error
+      error_line = nil
+      count = 0
+
+      @string.each_line do |line|
+        count += line.size
+        if count > @error_position
+          error_line = line
+          break
+        end
+      end
+
+      message = <<-EOM
+
+#{error_line.chomp}
+#{" " *(error_line.size - (count - @error_position))}^
+EOM
+      raise Syntax::SyntaxError, message
+    end
+
+    def syntax_error(pos)
+      @error_position = pos
     end
 
     def statement_start(statement)

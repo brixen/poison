@@ -265,7 +265,7 @@ arg-sep = '.' -        {  }
 
 %%
 
-VALUE poison_parse(VALUE self, VALUE string) {
+VALUE poison_parse_string(VALUE self, VALUE string) {
   Poison P;
 
   P.parser = self;
@@ -277,8 +277,8 @@ VALUE poison_parse(VALUE self, VALUE string) {
   G->pos = G->limit = 0;
 
   if (!poison_code_parse(G)) {
-    rb_funcall(P.parser, rb_intern("syntax_error"), 0);
-    return Qnil;
+    rb_funcall(P.parser, rb_intern("syntax_error"), 1, INT2FIX(G->end));
+    return P.ast = Qfalse;
   }
   poison_code_parse_free(G);
 
@@ -289,5 +289,5 @@ void Init_parser(void) {
   VALUE rb_mPoison = rb_const_get(rb_cObject, rb_intern("Poison"));
   VALUE rb_cParser = rb_const_get(rb_mPoison, rb_intern("Parser"));
 
-  rb_define_method(rb_cParser, "parse", RUBY_METHOD_FUNC(poison_parse), 1);
+  rb_define_method(rb_cParser, "parse_string", RUBY_METHOD_FUNC(poison_parse_string), 1);
 }
