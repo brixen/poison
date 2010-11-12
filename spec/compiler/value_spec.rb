@@ -54,4 +54,25 @@ describe "The Value node" do
       [:expr, [:value, ["world", nil, nil]]]
     end
   end
+
+  relates '(1, 2, "a")' do
+    parse do
+      [:expr, [:table,
+        [:expr, [:value, [1, nil, nil]]],
+        [:expr, [:value, [2, nil, nil]]],
+        [:expr, [:value, ["a", nil, nil]]]
+      ]]
+    end
+  end
+
+  relates '(a="one", b="two")' do
+    parse do
+      [:expr, [:table,
+        [:assign, [:expr,
+          [:message, ["a", nil, nil]]], [:expr, [:value, ["one", nil, nil]]]],
+        [:assign, [:expr,
+          [:message, ["b", nil, nil]]], [:expr, [:value, ["two", nil, nil]]]]
+      ]]
+    end
+  end
 end

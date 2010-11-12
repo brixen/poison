@@ -19,7 +19,11 @@ module Poison
       raise Syntax::SyntaxError
     end
 
-    def statement(statement)
+    def statement_start(statement)
+      @statements = [statement]
+    end
+
+    def statement_add(statement)
       @statements << statement
     end
 
@@ -170,6 +174,10 @@ module Poison
 
     def str2_add(string)
       @str2 << string
+    end
+
+    def table(entries)
+      Syntax::Table.new entries
     end
 
     def method_missing(sym, *args)

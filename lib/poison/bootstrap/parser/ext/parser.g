@@ -36,10 +36,10 @@
 
 poison = -- s:statements end-of-file { $$ = P->ast = PN_AST("statements", s); }
 
-statements = s1:stmt { $$ = PN_AST("statement", s1); }
-        (sep s2:stmt { $$ = PN_AST("statement", s2); })*
+statements = s1:stmt { $$ = PN_AST("statement_start", s1); }
+        (sep s2:stmt { $$ = PN_AST("statement_add", s2); })*
          sep?
-     | ''            { $$ = PN_AST("statement", Qnil); }
+     | ''            { $$ = PN_VAL("nil_kind"); }
 
 stmt = s:sets
        ( or x:sets          {  }
@@ -139,7 +139,7 @@ loose = value
       | v:unquoted { $$ = PN_AST("value", v); }
 
 closure = t:table? b:block {  }
-table = table-start s:statements table-end {  }
+table = table-start s:statements table-end { $$ = PN_AST("table", s); }
 block = block-start s:statements block-end {  }
 lick = lick-start i:lick-items lick-end {  }
 

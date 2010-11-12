@@ -22,6 +22,12 @@ module Poison
       end
     end
 
+    class NilKind < Literal
+      def initialize
+        @value = nil
+      end
+    end
+
     class Boolean < Literal
     end
 
@@ -43,9 +49,13 @@ module Poison
     class EscapedString < Literal
     end
 
-    class NilKind < Literal
-      def initialize
-        @value = nil
+    class Table < Literal
+      def initialize(entries)
+        @entries = entries.dup
+      end
+
+      def to_sexp
+        [:table].concat @entries.map { |e| e.to_sexp }
       end
     end
   end
