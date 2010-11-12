@@ -6,8 +6,12 @@ module Poison
       @g = Generator.new
     end
 
-    def compile(string)
-      ast = Parser.new.parse string
+    def compile(poison)
+      if poison.kind_of? Syntax::Node
+        ast = poison
+      else
+        ast = Parser.new.parse poison
+      end
 
       g.name = :call
       g.file = :"(poison)"
@@ -53,6 +57,14 @@ module Poison
       else
         g.push_pn_false
       end
+    end
+
+    def unescaped_string(node)
+      g.push_literal node.value
+    end
+
+    def escaped_string(node)
+      g.push_literal node.value
     end
 
     def message(node)

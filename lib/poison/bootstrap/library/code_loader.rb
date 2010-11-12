@@ -1,19 +1,16 @@
 module Poison
   class CodeLoader
-    def self.execute(ast)
+    # Accepts either a String or a Poison::Syntax node,
+    # compiles it, and executes it.
+    def self.execute(poison)
+      code = Compiler.new.compile poison
+      code.call
     end
 
+    # Takes a filename, loads it and executes it.
     def self.execute_file(name)
       source = File.read name
-      execute_script source
-    end
-
-    def self.execute_script(source)
-      compiler = Compiler.new source
-      ast = compiler.parse
-
-      # just give some output for now
-      ast.graph
+      execute source
     end
   end
 end
