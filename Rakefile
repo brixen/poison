@@ -78,6 +78,7 @@ EOS
   s.rdoc_options << '--title' << 'Poison Gem' <<
                     '--main' << 'README' <<
                     '--line-numbers'
+  s.add_dependency 'mspec', '~> 1.5.0'
 end
 
 Rake::GemPackageTask.new(spec){ |pkg| pkg.gem_spec = spec }
