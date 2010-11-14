@@ -1,4 +1,7 @@
+require 'poison/bootstrap/library/module'
 require 'poison/bootstrap/library/code_loader'
 require 'poison/bootstrap/library/code'
+require 'poison/bootstrap/library/nil'
 require 'poison/bootstrap/library/true'
+require 'poison/bootstrap/library/false'
 require 'poison/bootstrap/library/string'

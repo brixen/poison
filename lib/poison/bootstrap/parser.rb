@@ -74,11 +74,11 @@ EOM
     end
 
     def true_kind
-      Syntax::Boolean.new true
+      Syntax::TrueKind.new
     end
 
     def false_kind
-      Syntax::Boolean.new false
+      Syntax::FalseKind.new
     end
 
     def imag(value)

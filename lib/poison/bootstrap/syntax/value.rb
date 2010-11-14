@@ -38,9 +38,23 @@ module Poison
       end
     end
 
-    class Boolean < Literal
+    class TrueKind < Literal
+      def initialize
+        @value = true
+      end
+
       def visit(visitor)
-        visitor.boolean self
+        visitor.true_kind self
+      end
+    end
+
+    class FalseKind < Literal
+      def initialize
+        @value = false
+      end
+
+      def visit(visitor)
+        visitor.false_kind self
       end
     end
 

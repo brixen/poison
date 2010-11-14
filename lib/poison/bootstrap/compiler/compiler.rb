@@ -51,12 +51,16 @@ module Poison
       node.value.visit self
     end
 
-    def boolean(node)
-      if node.value
-        g.push_pn_true
-      else
-        g.push_pn_false
-      end
+    def nil_kind(node)
+      g.push :nil
+    end
+
+    def true_kind(node)
+      g.push :true
+    end
+
+    def false_kind(node)
+      g.push :false
     end
 
     def unescaped_string(node)
