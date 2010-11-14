@@ -3,5 +3,5 @@ class String
     print self
   end
 
-  alias_method :"pn:print", :pn_print
+  poison_methods
 end
