@@ -6,7 +6,31 @@ module Poison
       end
 
       def to_sexp
-        [sexp_name, @value]
+        [sexp_name, @value.to_sexp]
+      end
+    end
+
+    class Uminus < UnaryOperator
+      def sexp_name
+        :uminus
+      end
+    end
+
+    class Uplus < UnaryOperator
+      def sexp_name
+        :uplus
+      end
+    end
+
+    class Wavy < UnaryOperator
+      def sexp_name
+        :wavy
+      end
+    end
+
+    class Not < UnaryOperator
+      def sexp_name
+        :not
       end
     end
 

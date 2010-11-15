@@ -91,21 +91,21 @@ bitshift = s:sum
            {  }
 
 sum = p:product
-      ( plus x:product      {  }
-      | minus x:product     {  })*
-      {  }
+      ( plus x:product      { p = PN_OP("plus", p, x); }
+      | minus x:product     { p = PN_OP("minus", p, x); })*
+      { $$ = p; }
 
 product = s:sign
-          ( times x:sign           {  }
-          | div x:sign             {  }
-          | rem x:sign             {  }
-          | pow x:sign             {  })*
-          {  }
+          ( times x:sign           { s = PN_OP("times", s, x); }
+          | div x:sign             { s = PN_OP("div", s, x); }
+          | rem x:sign             { s = PN_OP("rem", s, x); }
+          | pow x:sign             { s = PN_OP("pow", s, x); })*
+          { $$ = s; }
 
-sign = minus !minus s:sign   {  }
-     | plus !plus s:sign     {  }
-     | not s:sign     {  }
-     | wavy s:sign    {  }
+sign = minus !minus s:sign   { $$ = PN_AST("uminus", s); }
+     | plus !plus s:sign     { $$ = PN_AST("uplus", s); }
+     | not s:sign     { $$ = PN_AST("not", s) }
+     | wavy s:sign    { $$ = PN_AST("wavy", s); }
      | e:expr         { $$ = e; }
 
 expr = ( a:atom ) { a = PN_AST("call_list", a); }

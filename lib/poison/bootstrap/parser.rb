@@ -157,6 +157,22 @@ EOM
       Syntax::BitRight.new left, right
     end
 
+    def uplus(value)
+      Syntax::Uplus.new value
+    end
+
+    def uminus(value)
+      Syntax::Uminus.new value
+    end
+
+    def wavy(value)
+      Syntax::Wavy.new value
+    end
+
+    def not(value)
+      Syntax::Not.new value
+    end
+
     def plus(left, right)
       Syntax::Plus.new left, right
     end

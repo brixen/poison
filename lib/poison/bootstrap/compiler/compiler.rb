@@ -74,5 +74,8 @@ module Poison
     def message(node)
       g.pn_send node.name
     end
+
+    def plus(node)
+    end
   end
 end
