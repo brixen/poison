@@ -1,47 +1,82 @@
 module Poison
   module Syntax
-    class UnaryOperator < Node
-      def initialize(value)
+    class Unary < Node
+      attr_accessor :op, :value
+
+      def initialize(op, value)
+        @op = op
         @value = value
+        @map = {
+          :- => :uminus,
+          :+ => :uplus,
+          :~ => :wavy,
+        }
+      end
+
+      def sexp_name
+        @map[@op]
       end
 
       def to_sexp
         [sexp_name, @value.to_sexp]
       end
-    end
 
-    class Uminus < UnaryOperator
-      def sexp_name
-        :uminus
+      def visit(visitor)
+        visitor.send sexp_name, self
       end
     end
 
-    class Uplus < UnaryOperator
-      def sexp_name
-        :uplus
+    class Not < Node
+      attr_accessor :value
+
+      def initialize(value)
+        @value = value
+      end
+
+      def to_sexp
+        [:not, @value.to_sexp]
       end
     end
 
-    class Wavy < UnaryOperator
-      def sexp_name
-        :wavy
-      end
-    end
+    class Binary < Node
+      attr_accessor :op, :left, :right
 
-    class Not < UnaryOperator
-      def sexp_name
-        :not
-      end
-    end
-
-    class BinaryOperator < Node
-      def initialize(left, right)
+      def initialize(op, left, right)
+        @op = op
         @left = left
         @right = right
+        @map = {
+          :+    => :plus,
+          :-    => :minus,
+          :*    => :times,
+          :/    => :div,
+          :%    => :rem,
+          :|    => :pipe,
+          :^    => :caret,
+          :&    => :amp,
+          :**   => :pow,
+          :>>   => :bitr,
+          :<<   => :bitl,
+          :"!=" => :neq,
+          :==   => :eq,
+          :<=>  => :cmp,
+          :<=   => :lte,
+          :<    => :lt,
+          :>=   => :gte,
+          :>    => :gt,
+        }
+      end
+
+      def sexp_name
+        @map[@op]
       end
 
       def to_sexp
         [sexp_name, @left.to_sexp, @right.to_sexp]
+      end
+
+      def visit(visitor)
+        visitor.send sexp_name, self
       end
     end
 
@@ -60,133 +95,32 @@ module Poison
       end
     end
 
-    class Or < BinaryOperator
+    class Connective < Node
+      attr_accessor :left, :right
+
+      def initialize(left, right)
+        @left = left
+        @right = right
+      end
+
+      def to_sexp
+        [sexp_name, @left.to_sexp, @right.to_sexp]
+      end
+
+      def visit(visitor)
+        visitor.send sexp_name, self
+      end
+    end
+
+    class Or < Connective
       def sexp_name
         :or
       end
-
-      def visit(visitor)
-        visitor.op_or self
-      end
     end
 
-    class And < BinaryOperator
+    class And < Connective
       def sexp_name
         :and
-      end
-
-      def visit(visitor)
-        visitor.op_and self
-      end
-    end
-
-    class Pipe < BinaryOperator
-      def sexp_name
-        :pipe
-      end
-
-      def visit(visitor)
-        visitor.pipe self
-      end
-    end
-
-    class Caret < BinaryOperator
-      def sexp_name
-        :caret
-      end
-
-      def visit(visitor)
-        visitor.caret self
-      end
-    end
-
-    class Amp < BinaryOperator
-      def sexp_name
-        :amp
-      end
-
-      def visit(visitor)
-        visitor.amp self
-      end
-    end
-
-    class BitLeft < BinaryOperator
-      def sexp_name
-        :bitl
-      end
-
-      def visit(visitor)
-        visitor.bit_left self
-      end
-    end
-
-    class BitRight < BinaryOperator
-      def sexp_name
-        :bitr
-      end
-
-      def visit(visitor)
-        visitor.bit_right self
-      end
-    end
-
-    class Plus < BinaryOperator
-      def sexp_name
-        :plus
-      end
-
-      def visit(visitor)
-        visitor.plus self
-      end
-    end
-
-    class Minus < BinaryOperator
-      def sexp_name
-        :minus
-      end
-
-      def visit(visitor)
-        visitor.minus self
-      end
-    end
-
-    class Times < BinaryOperator
-      def sexp_name
-        :times
-      end
-
-      def visit(visitor)
-        visitor.times self
-      end
-    end
-
-    class Div < BinaryOperator
-      def sexp_name
-        :div
-      end
-
-      def visit(visitor)
-        visitor.div self
-      end
-    end
-
-    class Rem < BinaryOperator
-      def sexp_name
-        :rem
-      end
-
-      def visit(visitor)
-        visitor.rem self
-      end
-    end
-
-    class Pow < BinaryOperator
-      def sexp_name
-        :pow
-      end
-
-      def visit(visitor)
-        visitor.pow self
       end
     end
   end

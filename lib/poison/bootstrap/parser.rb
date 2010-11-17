@@ -137,36 +137,64 @@ EOM
       Syntax::And.new left, right
     end
 
+    def cmp(left, right)
+      Syntax::Binary.new :<=>, left, right
+    end
+
+    def eq(left, right)
+      Syntax::Binary.new :==, left, right
+    end
+
+    def neq(left, right)
+      Syntax::Binary.new :"!=", left, right
+    end
+
+    def gte(left, right)
+      Syntax::Binary.new :>=, left, right
+    end
+
+    def gt(left, right)
+      Syntax::Binary.new :>, left, right
+    end
+
+    def lte(left, right)
+      Syntax::Binary.new :<=, left, right
+    end
+
+    def lt(left, right)
+      Syntax::Binary.new :<, left, right
+    end
+
     def pipe(left, right)
-      Syntax::Pipe.new left, right
+      Syntax::Binary.new :|, left, right
     end
 
     def caret(left, right)
-      Syntax::Caret.new left, right
+      Syntax::Binary.new :^, left, right
     end
 
     def amp(left, right)
-      Syntax::Amp.new left, right
+      Syntax::Binary.new :&, left, right
     end
 
     def bitl(left, right)
-      Syntax::BitLeft.new left, right
+      Syntax::Binary.new :<<, left, right
     end
 
     def bitr(left, right)
-      Syntax::BitRight.new left, right
+      Syntax::Binary.new :>>, left, right
     end
 
     def uplus(value)
-      Syntax::Uplus.new value
+      Syntax::Unary.new :+, value
     end
 
     def uminus(value)
-      Syntax::Uminus.new value
+      Syntax::Unary.new :-, value
     end
 
     def wavy(value)
-      Syntax::Wavy.new value
+      Syntax::Unary.new :~, value
     end
 
     def not(value)
@@ -174,27 +202,27 @@ EOM
     end
 
     def plus(left, right)
-      Syntax::Plus.new left, right
+      Syntax::Binary.new :+, left, right
     end
 
     def minus(left, right)
-      Syntax::Minus.new left, right
+      Syntax::Binary.new :-, left, right
     end
 
     def times(left, right)
-      Syntax::Times.new left, right
+      Syntax::Binary.new :*, left, right
     end
 
     def div(left, right)
-      Syntax::Div.new left, right
+      Syntax::Binary.new :/, left, right
     end
 
     def rem(left, right)
-      Syntax::Rem.new left, right
+      Syntax::Binary.new :%, left, right
     end
 
     def pow(left, right)
-      Syntax::Pow.new left, right
+      Syntax::Binary.new :**, left, right
     end
 
     def str1(ignored)

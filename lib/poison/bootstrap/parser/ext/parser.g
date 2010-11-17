@@ -42,9 +42,9 @@ statements = s1:stmt { $$ = PN_AST("statement_start", s1); }
      | ''            { $$ = PN_VAL("nil_kind"); }
 
 stmt = s:sets
-       ( or x:sets          {  }
-       | and x:sets         {  })*
-       {  }
+       ( or x:sets          { s = PN_OP("op_or", s, x); }
+       | and x:sets         { s = PN_OP("op_and", s, x); })*
+       { $$ = s; }
 
 sets = e:eqs
        ( assign s:sets       { e = PN_OP("assign", e, s); }
@@ -64,31 +64,31 @@ sets = e:eqs
        { $$ = e; }
 
 eqs = c:cmps
-      ( cmp x:cmps          {  }
-      | eq x:cmps           {  }
-      | neq x:cmps          {  })*
-      {  }
+      ( cmp x:cmps          { c = PN_OP("cmp", c, x); }
+      | eq x:cmps           { c = PN_OP("eq", c, x); }
+      | neq x:cmps          { c = PN_OP("neq", c, x); })*
+      { $$ = c; }
 
 cmps = o:bitors
-       ( gte x:bitors        {  }
-       | gt x:bitors         {  }
-       | lte x:bitors        {  }
-       | lt x:bitors         {  })*
-       {  }
+       ( gte x:bitors        { o = PN_OP("gte", o, x); }
+       | gt x:bitors         { o = PN_OP("gt", o, x); }
+       | lte x:bitors        { o = PN_OP("lte", o, x); }
+       | lt x:bitors         { o = PN_OP("lt", o, x); })*
+       { $$ = o; }
 
 bitors = a:bitand
-         ( pipe x:bitand       {  }
-         | caret x:bitand      {  })*
-         {  }
+         ( pipe x:bitand       { a = PN_OP("pipe", a, x); }
+         | caret x:bitand      { a = PN_OP("caret", a, x); })*
+         { $$ = a; }
 
 bitand = b:bitshift
-         ( amp x:bitshift      {  })*
-         {  }
+         ( amp x:bitshift      { b = PN_OP("amp", b, x); })*
+         { $$ = b; }
 
 bitshift = s:sum
-           ( bitl x:sum          {  }
-           | bitr x:sum          {  })*
-           {  }
+           ( bitl x:sum          { s = PN_OP("bitl", s, x); }
+           | bitr x:sum          { s = PN_OP("bitr", s, x); })*
+           { $$ = s; }
 
 sum = p:product
       ( plus x:product      { p = PN_OP("plus", p, x); }
