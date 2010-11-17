@@ -77,5 +77,17 @@ module Poison
 
     def plus(node)
     end
+
+    def integer(node)
+      g.push_literal node.value
+    end
+
+    def real(node)
+      g.push_literal node.value
+    end
+
+    def imaginary(node)
+      g.push_literal node.value
+    end
   end
 end
