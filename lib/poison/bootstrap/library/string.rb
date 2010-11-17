@@ -3,5 +3,7 @@ class String
     print self
   end
 
+  poison_alias :string, :to_s
+
   poison_methods
 end
