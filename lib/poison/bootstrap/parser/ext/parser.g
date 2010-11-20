@@ -4,6 +4,8 @@
 #
 # (c) 2010 Brian Ford
 #
+# Based on the Potion grammar, (c) 2009 _why
+#
 
 %{
 
@@ -116,7 +118,7 @@ atom = e:value | e:closure | e:table | e:call
 
 call = (n:name { v = Qnil; b = Qnil; } (v:value | v:table)? |
        (v:value | v:table) { n = PN_AST("message", Qnil); b = Qnil; })
-         b:block? { $$ = n;   }
+         b:closure? { $$ = n;   }
 
 name = p:path           { $$ = PN_AST("path", p); }
      | quiz ( m:message { $$ = PN_AST("query", m); }
@@ -138,9 +140,8 @@ lick-item = m:message t:table v:loose {  }
 loose = value
       | v:unquoted { $$ = PN_AST("value", v); }
 
-closure = t:table? b:block {  }
 table = table-start s:statements table-end { $$ = PN_AST("table", s); }
-block = block-start s:statements block-end {  }
+closure = closure-start { t = Qnil; } t:table? s:statements closure-end { $$ = PN_AST2("closure", t, s); }
 lick = lick-start i:lick-items lick-end {  }
 
 path = '/' m:message    { $$ = PN_AST("path", m); }
@@ -169,8 +170,8 @@ utf8 = [\t\n\r\40-\176]
      | [\360-\364] [\200-\277] [\200-\277] [\200-\277]
 
 comma = ','
-block-start = ':' --
-block-end = '.' -
+closure-start = ':' --
+closure-end = '.' -
 table-start = '(' --
 table-end = ')' -
 lick-start = '[' --

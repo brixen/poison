@@ -253,6 +253,10 @@ EOM
       Syntax::Table.new entries
     end
 
+    def closure(table, statements)
+      Syntax::Closure.new table, statements
+    end
+
     def method_missing(sym, *args)
       STDERR.puts "y'all called: #{sym}, #{args.inspect}"
     end

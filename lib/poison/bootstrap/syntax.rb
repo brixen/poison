@@ -1,5 +1,6 @@
 require 'poison/bootstrap/syntax/node'
 require 'poison/bootstrap/syntax/value'
+require 'poison/bootstrap/syntax/closure'
 require 'poison/bootstrap/syntax/expression'
 require 'poison/bootstrap/syntax/operator'
 require 'poison/bootstrap/syntax/message'
