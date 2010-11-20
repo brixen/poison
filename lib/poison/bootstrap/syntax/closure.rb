@@ -9,10 +9,9 @@ module Poison
       end
 
       def to_sexp
-        body = [@table ? @table.to_sexp : nil]
-        body.concat @statements.map { |s| s.to_sexp }
-
-        [:closure, body]
+        [:closure,
+          table ? @table.to_sexp : nil
+          ].concat @statements.map { |s| s.to_sexp }
       end
     end
   end
