@@ -93,6 +93,8 @@ module Poison
     end
 
     class Table < Literal
+      attr_reader :entries
+
       def initialize(entries)
         @entries = entries.dup
       end
