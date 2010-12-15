@@ -43,6 +43,7 @@ task :build => [:parser, parser_e]
 desc "Clean the parser extension files"
 task :clean do
   rm_f Dir[parser_d + "/{parser.c,*.o,*.#{dlext}}"]
+  rm_f FileList["**/*.rbc"]
 end
 
 desc "Build greg parser generator"
