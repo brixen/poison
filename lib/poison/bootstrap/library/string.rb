@@ -1,7 +1,4 @@
 class String
-  def pn_print
-    print self
-  end
 
   def pn_number
     node = Poison::Parser.new.parse self
