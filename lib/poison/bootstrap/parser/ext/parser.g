@@ -212,7 +212,7 @@ int = < digits >
 real = < digits '.' digits ('e' [-+]? [0-9]+)? >
 imag = (real | int) 'i'
 
-q1 = [']
+q1 = ['] # ' for emacs
 c1 = < (!q1 utf8)+ > { PN_AST("str1_add", rb_str_new(yytext, yyleng)); }
 str1 = q1 { PN_AST("str1_clear", Qnil); }
        < (q1 q1 { PN_AST("str1_add", rb_str_new2("'")); } | c1)* >
@@ -227,8 +227,8 @@ esct        = esc 't' {  }
 escu        = esc 'u' < hexl hexl hexl hexl > { }
 escc = esc < utf8 > {  }
 
-q2 = ["]
-e2 = '\\' ["] { PN_AST("str2_add", rb_str_new2("\"")); }
+q2 = ["] # " for emacs
+e2 = '\\' ["] { PN_AST("str2_add", rb_str_new2("\"")); } # " for emacs
 c2 = < (!q2 !esc utf8)+ > { PN_AST("str2_add", rb_str_new(yytext, yyleng)); }
 str2 = q2 { PN_AST("str2_clear", Qnil); }
        < (e2 | escn | escb | escf | escr | esct | escu | escc | c2)* >
