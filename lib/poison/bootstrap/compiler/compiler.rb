@@ -89,5 +89,66 @@ module Poison
     def imaginary(node)
       g.push_literal node.value
     end
+
+    # Creates a Table object.
+    #
+    # A table is a container with index-access or key-access
+    #
+    #   foo = ("bar", "baz") # a list
+    #   foo at(0)     # => "bar"
+    #
+    #   foo = (bar = "baz")  # a dict
+    #   foo at("bar") # => "baz"
+    #
+    # From _why's Potion, it's unclear what the behaviour should
+    # be for a table created with a mix of assign and values
+    #
+    #   foo = (bar = "baz", "bat")
+    #   foo at(0)     # => nil
+    #   foo at('bar') # => "baz"
+    #   foo at(1)     # => nil
+    #
+    # So what we do for Poison is this: if we find any of the
+    # table expressions to be an assignment, then the table is
+    # backed by a ruby Hash, otherwise its backed by a ruby List.
+    #
+    def table(node)
+      if node.entries.any? { |e| e.kind_of?(Syntax::Assign) }
+        # A hash, all entries not being an assign, get a value of nil
+
+        g.push_cpath_top
+        g.find_const :Hash
+        g.push node.entries.size
+        g.send :new_from_literal, 1
+
+        node.entries.each do |entry|
+          g.dup
+          if entry.kind_of? Syntax::Assign
+            # if key is a single name, we use its string value as key
+            if  entry.name.expressions.size == 1 &&
+                entry.name.expressions.first.kind_of?(Syntax::Message)
+              g.push_literal entry.name.expressions.first.name
+            else
+              entry.name.visit self
+            end
+            entry.value.visit self
+          else
+            entry.visit self
+            g.push_nil
+          end
+          g.send :[]=, 2
+          g.pop
+        end
+      else
+        # A list
+        node.entries.each { |entry| entry.visit self }
+        g.make_array node.entries.size
+      end
+
+      g.push_cpath_top
+      g.find_const :Table
+      g.swap
+      g.send :new, 1
+    end
   end
 end
