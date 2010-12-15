@@ -8,14 +8,6 @@
 #
 class Table
 
-  # Create a table containing a list of poison objects
-  def self.list
-  end
-
-  # Create a table containing assoc key-value objects
-  def self.dict
-  end
-
   def initialize(collection)
     @collection = collection
   end
