@@ -4,7 +4,7 @@ describe "Table" do
   it "is created by a sequence of values in paretheses" do
     table = Poison::CodeLoader.execute "(1, 2, 3)"
     table.should be_kind_of(Table)
-  end
+    end
 
   it "is created by sequence of assignments in parentheses" do
     table = Poison::CodeLoader.execute "(a = 1, b = 2, c = 3)"
@@ -13,19 +13,19 @@ describe "Table" do
 end
 
 describe "Table#at" do
-  it "is access values by index" do
+  it "can access values by index" do
     table = Poison::CodeLoader.execute "(9, 8, 7)"
     table.poison(:at, 0).should == 9
     table.poison(:at, 1).should == 8
     table.poison(:at, 2).should == 7
   end
 
-  it "is access values by key" do
+  it "can access values by key" do
     table = Poison::CodeLoader.execute "(a = 1, b = 2, c = 3)"
     table.poison(:at, :b).should == 2
   end
 
-  it "is access value by key or index" do
+  it "can access value by named key or index" do
     table = Poison::CodeLoader.execute "(9, b = 2, 7)"
     table.poison(:at, 0).should == 9
     table.poison(:at, :b).should == 2
@@ -33,7 +33,7 @@ describe "Table#at" do
     table.poison(:at, 2).should == 7
   end
 
-  it "is access value by key or index" do
+  it "can access value by expression key or index" do
     table = Poison::CodeLoader.execute "('bar' = 90, 'foo' = 2)"
     table.poison(:at, 1).should == 2
     table.poison(:at, "foo").should == 2
