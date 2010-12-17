@@ -113,42 +113,30 @@ module Poison
     # backed by a ruby Hash, otherwise its backed by a ruby List.
     #
     def table(node)
-      if node.entries.any? { |e| e.kind_of?(Syntax::Assign) }
-        # A hash, all entries not being an assign, get a value of nil
-
-        g.push_cpath_top
-        g.find_const :Hash
-        g.push node.entries.size
-        g.send :new_from_literal, 1
-
-        node.entries.each do |entry|
-          g.dup
-          if entry.kind_of? Syntax::Assign
-            # if key is a single name, we use its string value as key
-            if  entry.name.expressions.size == 1 &&
-                entry.name.expressions.first.kind_of?(Syntax::Message)
-              g.push_literal entry.name.expressions.first.name
-            else
-              entry.name.visit self
-            end
-            entry.value.visit self
-          else
-            entry.visit self
-            g.push_nil
-          end
-          g.send :[]=, 2
-          g.pop
-        end
-      else
-        # A list
-        node.entries.each { |entry| entry.visit self }
-        g.make_array node.entries.size
-      end
-
       g.push_cpath_top
       g.find_const :Table
-      g.swap
-      g.send :new, 1
+      g.send :new, 0
+
+      node.entries.each_with_index do |entry, index|
+        g.dup
+        g.push_literal index
+
+        if entry.kind_of?(Syntax::Assign)
+          if entry.name.kind_of?(Syntax::Expression) &&
+             entry.name.expressions.first.kind_of?(Syntax::Message)
+            g.push_literal entry.name.expressions.first.name.to_sym
+          else
+            entry.name.visit self
+          end
+          entry.value.visit self
+
+          g.send :put_key, 3
+        else
+          entry.visit self
+          g.send :put_val, 2
+        end
+        g.pop
+      end
     end
   end
 end

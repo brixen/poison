@@ -11,3 +11,43 @@ describe "Table" do
     table.should be_kind_of(Table)
   end
 end
+
+describe "Table#at" do
+  it "is access values by index" do
+    table = Poison::CodeLoader.execute "(9, 8, 7)"
+    table.poison(:at, 0).should == 9
+    table.poison(:at, 1).should == 8
+    table.poison(:at, 2).should == 7
+  end
+
+  it "is access values by key" do
+    table = Poison::CodeLoader.execute "(a = 1, b = 2, c = 3)"
+    table.poison(:at, :b).should == 2
+  end
+
+  it "is access value by key or index" do
+    table = Poison::CodeLoader.execute "(9, b = 2, 7)"
+    table.poison(:at, 0).should == 9
+    table.poison(:at, :b).should == 2
+    table.poison(:at, 1).should == 2
+    table.poison(:at, 2).should == 7
+  end
+
+  it "is access value by key or index" do
+    table = Poison::CodeLoader.execute "('bar' = 90, 'foo' = 2)"
+    table.poison(:at, 1).should == 2
+    table.poison(:at, "foo").should == 2
+  end
+end
+
+describe "Table accessor" do
+  it "is generated for an assign having a name as left hand side" do
+    table = Poison::CodeLoader.execute "(9, foo = 42, 'bar' = 7)"
+    table.poison(:foo).should == 42
+  end
+
+  it "is not generated for an assign having an expression as left hand side" do
+    table = Poison::CodeLoader.execute "(9, foo = 42, 'bar' = 7)"
+    table.should_not respond_to("pn:bar")
+  end
+end
