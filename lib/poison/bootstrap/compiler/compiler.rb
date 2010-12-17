@@ -91,27 +91,6 @@ module Poison
     end
 
     # Creates a Table object.
-    #
-    # A table is a container with index-access or key-access
-    #
-    #   foo = ("bar", "baz") # a list
-    #   foo at(0)     # => "bar"
-    #
-    #   foo = (bar = "baz")  # a dict
-    #   foo at("bar") # => "baz"
-    #
-    # From _why's Potion, it's unclear what the behaviour should
-    # be for a table created with a mix of assign and values
-    #
-    #   foo = (bar = "baz", "bat")
-    #   foo at(0)     # => nil
-    #   foo at('bar') # => "baz"
-    #   foo at(1)     # => nil
-    #
-    # So what we do for Poison is this: if we find any of the
-    # table expressions to be an assignment, then the table is
-    # backed by a ruby Hash, otherwise its backed by a ruby List.
-    #
     def table(node)
       g.push_cpath_top
       g.find_const :Table
