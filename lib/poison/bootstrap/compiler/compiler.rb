@@ -29,11 +29,11 @@ module Poison
       g.close
 
       g.encode
-      cm = g.package ::Rubinius::CompiledMethod
+      cm = g.package ::Rubinius::CompiledCode
       puts cm.decode if $DEBUG
 
       code = Poison::Code.new
-      ss = ::Rubinius::StaticScope.new Object
+      ss = ::Rubinius::ConstantScope.new Object
       ::Rubinius.attach_method g.name, cm, ss, code
 
       code
