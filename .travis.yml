@@ -1,0 +1,5 @@
+language: ruby
+script:
+  - RUBYLIB=. bundle exec mspec spec
+rvm:
+  - rbx
