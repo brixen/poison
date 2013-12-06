@@ -28,4 +28,5 @@ EOS
 
   gem.add_runtime_dependency     'redcard', '~> 1.0'
   gem.add_development_dependency 'mspec', '~> 1.5.0'
+  gem.add_development_dependency 'kpeg', '~> 0.10'
 end
