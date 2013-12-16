@@ -3,11 +3,16 @@ require 'kpeg/compiled_parser'
 class Poison::Parser < KPeg::CompiledParser
   # :stopdoc:
 
-  # root = statements:s end-of-file { s }
+  # root = - statements:s end-of-file { s }
   def _root
 
     _save = self.pos
     while true # sequence
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
       _tmp = apply(:_statements)
       s = @result
       unless _tmp
@@ -35,16 +40,6 @@ class Poison::Parser < KPeg::CompiledParser
   def _statements
     _tmp = get_byte
     set_failed_rule :_statements unless _tmp
-    return _tmp
-  end
-
-  # end-of-file = !.
-  def _end_hyphen_of_hyphen_file
-    _save = self.pos
-    _tmp = get_byte
-    _tmp = _tmp ? nil : true
-    self.pos = _save
-    set_failed_rule :_end_hyphen_of_hyphen_file unless _tmp
     return _tmp
   end
 
@@ -299,6 +294,203 @@ class Poison::Parser < KPeg::CompiledParser
     return _tmp
   end
 
+  # ws = (space | comment)*
+  def _ws
+    while true
+
+      _save1 = self.pos
+      while true # choice
+        _tmp = apply(:_space)
+        break if _tmp
+        self.pos = _save1
+        _tmp = apply(:_comment)
+        break if _tmp
+        self.pos = _save1
+        break
+      end # end choice
+
+      break unless _tmp
+    end
+    _tmp = true
+    set_failed_rule :_ws unless _tmp
+    return _tmp
+  end
+
+  # - = (space | comment | end-of-line)*
+  def __hyphen_
+    while true
+
+      _save1 = self.pos
+      while true # choice
+        _tmp = apply(:_space)
+        break if _tmp
+        self.pos = _save1
+        _tmp = apply(:_comment)
+        break if _tmp
+        self.pos = _save1
+        _tmp = apply(:_end_hyphen_of_hyphen_line)
+        break if _tmp
+        self.pos = _save1
+        break
+      end # end choice
+
+      break unless _tmp
+    end
+    _tmp = true
+    set_failed_rule :__hyphen_ unless _tmp
+    return _tmp
+  end
+
+  # sep = (end-of-line | comma) (space | comment | end-of-line | comma)*
+  def _sep
+
+    _save = self.pos
+    while true # sequence
+
+      _save1 = self.pos
+      while true # choice
+        _tmp = apply(:_end_hyphen_of_hyphen_line)
+        break if _tmp
+        self.pos = _save1
+        _tmp = apply(:_comma)
+        break if _tmp
+        self.pos = _save1
+        break
+      end # end choice
+
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      while true
+
+        _save3 = self.pos
+        while true # choice
+          _tmp = apply(:_space)
+          break if _tmp
+          self.pos = _save3
+          _tmp = apply(:_comment)
+          break if _tmp
+          self.pos = _save3
+          _tmp = apply(:_end_hyphen_of_hyphen_line)
+          break if _tmp
+          self.pos = _save3
+          _tmp = apply(:_comma)
+          break if _tmp
+          self.pos = _save3
+          break
+        end # end choice
+
+        break unless _tmp
+      end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_sep unless _tmp
+    return _tmp
+  end
+
+  # comment = "#" (!end-of-line utf8)*
+  def _comment
+
+    _save = self.pos
+    while true # sequence
+      _tmp = match_string("#")
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      while true
+
+        _save2 = self.pos
+        while true # sequence
+          _save3 = self.pos
+          _tmp = apply(:_end_hyphen_of_hyphen_line)
+          _tmp = _tmp ? nil : true
+          self.pos = _save3
+          unless _tmp
+            self.pos = _save2
+            break
+          end
+          _tmp = apply(:_utf8)
+          unless _tmp
+            self.pos = _save2
+          end
+          break
+        end # end sequence
+
+        break unless _tmp
+      end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_comment unless _tmp
+    return _tmp
+  end
+
+  # space = (" " | "\\f" | "\\v" | "\\t")
+  def _space
+
+    _save = self.pos
+    while true # choice
+      _tmp = match_string(" ")
+      break if _tmp
+      self.pos = _save
+      _tmp = match_string("\\f")
+      break if _tmp
+      self.pos = _save
+      _tmp = match_string("\\v")
+      break if _tmp
+      self.pos = _save
+      _tmp = match_string("\\t")
+      break if _tmp
+      self.pos = _save
+      break
+    end # end choice
+
+    set_failed_rule :_space unless _tmp
+    return _tmp
+  end
+
+  # end-of-line = ("\\r\\n" | "\\n" | "\\r")
+  def _end_hyphen_of_hyphen_line
+
+    _save = self.pos
+    while true # choice
+      _tmp = match_string("\\r\\n")
+      break if _tmp
+      self.pos = _save
+      _tmp = match_string("\\n")
+      break if _tmp
+      self.pos = _save
+      _tmp = match_string("\\r")
+      break if _tmp
+      self.pos = _save
+      break
+    end # end choice
+
+    set_failed_rule :_end_hyphen_of_hyphen_line unless _tmp
+    return _tmp
+  end
+
+  # end-of-file = !.
+  def _end_hyphen_of_hyphen_file
+    _save = self.pos
+    _tmp = get_byte
+    _tmp = _tmp ? nil : true
+    self.pos = _save
+    set_failed_rule :_end_hyphen_of_hyphen_file unless _tmp
+    return _tmp
+  end
+
   # hexl = /[0-9A-Fa-f]/
   def _hexl
     _tmp = scan(/\A(?-mix:[0-9A-Fa-f])/)
@@ -476,14 +668,20 @@ class Poison::Parser < KPeg::CompiledParser
   end
 
   Rules = {}
-  Rules[:_root] = rule_info("root", "statements:s end-of-file { s }")
+  Rules[:_root] = rule_info("root", "- statements:s end-of-file { s }")
   Rules[:_statements] = rule_info("statements", ".")
-  Rules[:_end_hyphen_of_hyphen_file] = rule_info("end-of-file", "!.")
   Rules[:_utfw] = rule_info("utfw", "(/[A-Za-z0-9_$@;`{}]/ | \"\\\\304\" /[\\250-\\277]/ | /[\\305-\\337]/ /[\\200-\\277]/ | /[\\340-\\357]/ /[\\200-\\277]/ /[\\200-\\277]/ | /[\\360-\\364]/ /[\\200-\\277]/ /[\\200-\\277]/ /[\\200-\\277]/)")
   Rules[:_utf8] = rule_info("utf8", "(/[\\t\\n\\r\\40-\\176]/ | /[\\302-\\337]/ /[\\200-\\277]/ | /[\\340-\\357]/ /[\\200-\\277]/ /[\\200-\\277]/ | /[\\360-\\364]/ /[\\200-\\277]/ /[\\200-\\277]/ /[\\200-\\277]/)")
   Rules[:_nil] = rule_info("nil", "\"nil\" !utfw")
   Rules[:_true] = rule_info("true", "\"true\" !utfw")
   Rules[:_false] = rule_info("false", "\"false\" !utfw")
+  Rules[:_ws] = rule_info("ws", "(space | comment)*")
+  Rules[:__hyphen_] = rule_info("-", "(space | comment | end-of-line)*")
+  Rules[:_sep] = rule_info("sep", "(end-of-line | comma) (space | comment | end-of-line | comma)*")
+  Rules[:_comment] = rule_info("comment", "\"\#\" (!end-of-line utf8)*")
+  Rules[:_space] = rule_info("space", "(\" \" | \"\\\\f\" | \"\\\\v\" | \"\\\\t\")")
+  Rules[:_end_hyphen_of_hyphen_line] = rule_info("end-of-line", "(\"\\\\r\\\\n\" | \"\\\\n\" | \"\\\\r\")")
+  Rules[:_end_hyphen_of_hyphen_file] = rule_info("end-of-file", "!.")
   Rules[:_hexl] = rule_info("hexl", "/[0-9A-Fa-f]/")
   Rules[:_hex] = rule_info("hex", "\"0x\" < hexl+ >")
   Rules[:_digits] = rule_info("digits", "(\"0\" | /[1-9]/ /[0-9]*/)")
